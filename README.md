@@ -1,65 +1,30 @@
-# GraphEd-JGraphEd
+# OpenGraphEd
 
-Legacy Java graph editor (2004) restored to run on modern Java.
+Modernized and extended graph editor based on **JGraphEd**.
 
-Download the latest binary:
-https://github.com/<username>/GraphEd-JGraphEd/releases
+OpenGraphEd continues from a JGraphEd-based codebase and adds integration, cleanup, adaptation for modern Java, and room for further development.
 
-![GraphEd Screenshot](docs/screenshot.png)
+## Origin and credits
 
----
+OpenGraphEd is based on the original **JGraphEd** code line.
 
-## Run
+This repository builds on the JGraphEd tradition and continues it in a modernized and extended form.
 
-Download the latest binary from the **Releases** page (`JGraphEd.jar`).
+Reference repository:  
+[Graph-JGraphEd](https://github.com/kruin/Graph-JGraphEd)
 
-Then run:
+## Status
 
-```
-java -jar JGraphEd.jar
-```
+This repository contains a working integrated version:
 
----
+- build: OK
+- run: OK
+
+It is intended as the new active development line for OpenGraphEd.
 
 ## Build
 
 Windows:
 
-```
+```bat
 build.bat
-```
-
-Run locally:
-
-```
-run.bat
-```
-
----
-
-## Structure
-
-```
-dataStructure/      core data structures
-graphStructure/     graph model
-operation/          graph algorithms
-userInterface/      Swing UI
-images/             toolbar icons
-help/               HTML help pages
-docs/               PDF files from around 2004
-```
-
----
-
-## Notes
-
-The original code used several obsolete Java APIs.
-The following updates were applied:
-
-* replaced legacy JPEG encoder with ImageIO
-* renamed identifiers conflicting with modern Java keywords
-* added simple build and run scripts
-* included runtime resources in build output
-
-Applet support remains for historical reasons but modern browsers do not support Java applets.
-The desktop application is the primary runtime target.
