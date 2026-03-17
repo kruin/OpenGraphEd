@@ -1,0 +1,115 @@
+<html>
+<head>
+<title>JGraphEd Help - Edit Mode</title>
+</head>
+<body>
+<h1>Edit Mode</h1>
+<table><tr>
+<td><img src="../images/Edit.gif"></td>
+<td>To change the currently active Graph Editor Window into edit mode click the Edit Button,
+or choose Edit from the Modes Menu.</td>
+</tr></table>
+<h2><u>Actions within the Graph Editor Window</u></h2>
+In Edit Mode, several commands can be performed by using the mouse and/or keyboard within the currently
+active Graph Editor Window:<br>
+<table border="1">
+<tr><th>Command</th><th>Trigger</th><th>Resulting Action</th></tr>
+<tr>
+<td><b>Node creation</b></td>
+<td>Single / Double click in empty space</td>
+<td>A new node is created at the current mouse location. (<b>Note:</b> See <a href="preferences.htm">Preferences</a>)</td>
+</tr>
+<tr>
+<td><b>Node selection</b></td>
+<td>Single click on an existing node, or drag the mouse from an empty location to create a rectangle around the desired nodes</td>
+<td>The selection of the node is turned on (black dashed circle around) or off  (<b>Note:</b> you can also select edges
+    by dragging the mouse from an empty location, all nodes or edges within the green rectangle will be selected when the
+    mouse button is released)</td>
+</tr>
+<tr>
+<td><b>Node movement</b></td>
+<td>Press and drag the mouse over a <b>selected</b> node</td>
+<td>The selected node is dragged to a new location (<b>Note:</b> Holding down the Control key causes all selected nodes to be moved)</td>
+</tr>
+<tr>
+<td><b>Node deletion</b></td>
+<td>Press the Delete Key</td>
+<td>All selected Nodes (and Edges) are deleted (<b>Note:</b> This is the same as the 'Remove Selected' menu / toolbar option)</td>
+</tr>
+<tr>
+<td><b>Node labeling</b></td>
+<td>Right-click a node and click the <b>label button</b> from the popup. </td>
+<td>The node label is changed to the value you enter. (<b>Note:</b> Change to 'Show Labels' from the toolbar or display menu to see node labels)
+    (<b>Note:</b> Holding down the Control key while right clicking allows the label of all selected nodes to be changed)</td>
+</tr>
+<tr>
+<td><b>Node colouring</b></td>
+<td>Right-click a node and click the <b>colour button</b> from the popup. </td>
+<td>The node colour is changed to the value you enter.
+    (<b>Note:</b> Holding down the Control key while right clicking allows the colour of all selected nodes to be changed)</td>
+</tr>
+<tr>
+<td><b>Edge creation</b></td>
+<td>Press and drag the mouse over a <b>non-selected</b> node</td>
+<td>An edge will be created linking the non-selected node to whichever node the mouse is released over,
+    or an edge will be created linking the non-selected node to a new node at the position where the mouse is released
+    (<b>Note:</b> See <a href="preferences.htm">Preferences</a>)</td>
+</tr>
+<tr>
+<td><b>Edge and Node creation</b></td>
+<td>Press and hold the control key and then press and drag the mouse from a <b>non-selected</b> node, or if enabled,
+    press and drag the mouse from a <b>non-selected</b> node.</td>
+<td>An edge will be created linking the non-selected node to a new node at the position where the mouse is released.
+    (<b>Note:</b> See <a href="preferences.htm">Preferences</a>)</td>
+</tr>
+<tr>
+<td><b>Edge selection</b></td>
+<td>Single click on the 'bump' located at the center of the desired edge, or drag the mouse from an empty location to create a rectangle around the desired edges (centers points)</td>
+<td>The selection of the edge is turned on (black dashed line underneath) or off (<b>Note:</b> you can also select edges
+    by dragging the mouse from an empty location, all nodes or edges within the green rectangle will be selected when the
+    mouse button is released)</td>
+</tr>
+<tr>
+<td><b>Edge deletion</b></td>
+<td>Press the Delete Key</td>
+<td>All selected Edges (and Nodes) are deleted (<b>Note:</b> This is the same as the 'Remove Selected' menu / toolbar option)</td>
+</tr>
+<tr>
+<td><b>Edge order display</b></td>
+<td>Press and hold the control key and then click on a node or the center 'bump' of an edge</td>
+<td>The edges around the chosen node are flashed in order,
+    or the edges bordering the same faces as the chosen edge are flashed in order (<b>Note:</b> Pressing and holding Control and Shift reverses the order for nodes)</td>
+</tr>
+<tr>
+<td><b>Edge curving</b></td>
+<td>Select the edge to curve and drag its center point.</td>
+<td>Dragging the center point will make the edge be a curve going through that point as defined by a bezier curve. (<b>Note:</b> After curving an edge, the angle of the curve will be preserved when end points are moved)</td>
+</tr>
+<tr>
+<td><b>Edge straightening</b></td>
+<td>Right-click an edge (center-point) and click the <b>make straight button</b> from the popup.</td>
+<td>The edge will become straight (its center-point will become aligned with the end points)
+    (<b>Note:</b> Holding down the Control key while right clicking allows all selected edges to be straightened)</td>
+</tr>
+<tr>
+<td><b>Edge directing</b></td>
+<td>Press the mouse over the source end Node and drag the mouse to the destination end Node.</td>
+<td>The Edge is directed (drawn with an arrow at the center).towards the destination Node.
+    (<b>Note:</b> Directing an edge in the opposite direction of its existing direction will make the edge undirected)</td>
+</tr>
+<tr>
+<td><b>Edge undirecting</b></td>
+<td>Press the mouse over the <b>destination</b> end Node and drag the mouse to the <b>target</b> end Node or,
+    Right-click an edge (center-point or arrow) and click the <b>Remove Direction button</b> from the popup.</td>
+<td>The direction of the Edge (drawn with an arrow at the center).is removed.
+    (<b>Note:</b> Holding down the Control key while right clicking allows all selected edges to be undirected)</td>
+</tr>
+<tr>
+<td><b>Edge colouring</b></td>
+<td>Right-click an edge (center-point) and click the <b>colour button</b> from the popup.</td>
+<td>The edge colour is changed to the value you enter.
+    (<b>Note:</b> Holding down the Control key while right clicking allows the colour of all selected edges to be changed)</td>
+</tr>
+</table>
+</body>
+</html>

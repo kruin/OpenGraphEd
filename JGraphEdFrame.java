@@ -1,0 +1,60 @@
+import java.awt.*;
+import javax.swing.*;
+import java.awt.event.*;
+import userInterface.*;
+
+public class JGraphEdFrame extends JFrame implements WindowListener
+{
+  public static final int WIDTH = 1000;//865;//HOW TO SET MAX?
+  public static final int HEIGHT = 800;//600;
+//GraphEditorWindow = 1150/750
+  private GraphController controller;
+
+  public JGraphEdFrame() throws Exception
+  {
+    super("JGraphEd");
+    controller = new GraphController(true);
+
+    getContentPane().setLayout(new BorderLayout());
+    getContentPane().add(controller.getToolBar(), BorderLayout.NORTH);
+    getContentPane().add(controller.getGraphWindow(), BorderLayout.CENTER);
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    setJMenuBar(controller.getMenuBar());
+    addWindowListener(this);
+    setSize(WIDTH,HEIGHT);
+    setVisible(true);
+  }
+
+  public void windowClosing(WindowEvent e)
+  {
+    if ( controller.hasUnsavedGraphs() )
+    {
+      int returnInt = JOptionPane.showConfirmDialog(controller.getGraphWindow(),
+                      "Are you sure you want to discard all changes to " + 
+                      "open graph editor windows ?",
+                      "Exit JGraphEd", JOptionPane.YES_NO_OPTION);
+      if ( returnInt == JOptionPane.YES_OPTION )
+      {
+        System.exit(0);
+      }
+    }
+    else
+    {
+      System.exit(0);
+    }
+  }
+  
+  public void windowActivated(WindowEvent e) { }
+  public void windowClosed(WindowEvent e) { }
+  public void windowDeactivated(WindowEvent e) { }
+  public void windowDeiconified(WindowEvent e) { }
+  public void windowIconified(WindowEvent e) { }
+  public void windowOpened(WindowEvent e) { }
+  
+  public GraphController getController() { return controller; }
+  
+  public static void main(String args[]) throws Exception
+  {
+    new JGraphEdFrame();
+  }
+}

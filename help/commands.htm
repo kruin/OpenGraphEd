@@ -1,0 +1,200 @@
+<html>
+<head>
+<title>JGraphEd Help - Commands - ToolBar Buttons and Menu Items</title>
+</head>
+<body>
+<h1>Commands - ToolBar Buttons and Menu Items</h1>
+The following commands are available in JGraphEd by clicking the indicated
+tool bar button or menu item.<br>
+
+<h3>File Commands</h3>
+<table><tr>
+<td><img src="../images/Open.gif"></td>
+<td>Click this button or choose <b>Load Graph</b> from the File Menu to open a dialog allowing
+    selection of a graph file to load a graph from. The loaded graph will be displayed in a new
+    Graph Editor window.</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/Save.gif"></td>
+<td>Click this button or choose <b>Save Graph</b> from the File Menu to open a dialog allowing
+    selection of a ".graph" file to save the current graph to.<br>
+    <br>
+    A snapshot image of the current graph can be saved, and a ".jpg" or ".gif" file by
+    choosing 'Image Files' as the file type.</td>
+</tr></table>
+<h3>Miscellaneous Commands</h3>
+<table><tr>
+<td valign="top"><img src="../images/Preferences.gif"></td>
+<td>Click this button or choose <b>Preferences</b> from the File Menu to open the JGraphEd
+    preferences window. Various <a href="preferences.htm">configuration options</a> are available here.
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/Info.gif"></td>
+<td>Click this button or choose <b>Info</b> from the Info Menu to open a window showing information about the current graph.<br>
+    <br>
+    While the info window is open, any changes to the current graph will cause the information to be updated.
+    This can be very slow if a large graph is open since planarity tests etc. are performed after every change.
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/Log.gif"></td>
+<td>Click this button or choose <b>Log</b> from the Info Menu to open a window showing a log of all the algorithms run on the current graph.<br>
+    <br>
+    The log entries are all shown in chronological order (top to bottom). The time taken to execute each algorithm is shown.
+    Algorithms used as sub-routines for an algorithm can be listed (with respective times taken) by clicking on the
+    selector next to the log entry.
+</tr></table>
+<h3>Undo Commands</h3>
+<table><tr>
+<td><img src="../images/Undo.gif"></td>
+<td>Click this button or choose <b>Undo</b> from the Undo Menu to Undo the last Command.
+    This command is disabled when there are no commands to undo. (<b>Note</b>: All commands except node/edge selection/unselection are undoable.)</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/Redo.gif"></td>
+<td>Click this button or choose <b>Redo</b> from the Undo Menu to Redo the last Undone Command.
+    This command is disabled when no undos have been performed, or they have all been redone. Using a new command after undoing a previous command will prevent the previous command from being redone. (<b>Note</b>: All commands except node/edge selection/unselection are redoable.)</td>
+</tr></table>
+<table><tr>
+<td>
+  <table><tr><td><img src="../images/EnableUndos.gif"></td></tr>
+         <tr><td><img src="../images/Blank.gif" height=2 width=20></td></tr>
+         <tr><td><img src="../images/DisableUndos.gif"></td></td></tr>
+  </table>
+</td>
+<td>Click one of these buttons or choose <b>Enable/Disable Undos</b> from the Undo Menu to enable or disable the recording of undos and redos on the current graph.<br>
+    <br>
+    All undo/redo information is discarded when undos and redos are disabled.</td>
+</tr></table>
+<h3>Edit Commands</h3>
+<table><tr>
+<td><img src="../images/UnselectAll.gif"></td>
+<td>Click this button or choose <b>Unselect All</b> from the Edit Menu to unselect (dashed -> normal) all nodes and edges.</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/RemoveSelected.gif"></td>
+<td>Click this button or choose <b>Remove Selected</b> from the Edit Menu to delete all selected (dashed) nodes and edges.</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/RemoveAll.gif"></td>
+<td>Click this button or choose <b>Remove All</b> from the Edit Menu to delete <b>all</b> nodes and edges.</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/RemoveGenerated.gif"></td>
+<td>Click this button or choose <b>Remove Generated</b> from the Edit Menu to delete all generated (dashed) edges. (<b>Note</b>: Generated edges are those created by an operation, not directly by the user)</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/PreserveGenerated.gif"></td>
+<td>Click this button or choose <b>Preserve Generated</b> from the Edit Menu to preserve (dashed -> solid) all generated (dashed) edges.  (<b>Note</b>: Generated edges are those created by an operation, not directly by the user)</td>
+</tr></table>
+<h3>Test Commands</h3>
+<table><tr>
+<td><img src="../images/TestConnectivity.gif"></td>
+<td>Click this button or choose <b>Connectivity Test</b> from the Test Menu to test whether the current graph is connected.
+    A connected graph is a graph where every node has a path to every other node in the graph.</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/TestBiconnectivity.gif"></td>
+<td>Click this button or choose <b>Biconnectivity Test</b> from the Test Menu to test whether the current graph is biconnected.
+    A biconnected graph is a graph with no separator nodes. A separator node is a node through which every path between a pair of nodes must pass.</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/TestPlanarity.gif"></td>
+<td>Click this button or choose <b>Planarity Test</b> from the Test Menu to test whether the current graph is planar.
+    A planar graph is a graph which can be re-arranged or re-drawn without any edge crossings, while preserving node adjacencies.
+    Planar graphs with n nodes can have at most 3n-6 edges.</td>
+</tr></table>
+<h3>Operation Commands</h3>
+<table><tr>
+<td><img src="../images/Embed.gif"></td>
+<td>Click this button or choose <b>Embedding</b> from the Operation Menu to Embed the current graph.
+    An embedding is an ordering of the edges around each node such that drawing the edges in this order would result in no edge crossings. This will only work for planar graphs.(<b>Note</b>: follow the <b>Edge order display</b> instructions above to see this ordering)</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/MakeConnected.gif"></td>
+<td>Click this button or choose <b>Make Connected</b> from the Operation Menu to Connect the current graph.
+    The resulting graph will have a path from every node to every other node. (<b>Note</b>: The edges added by this operation are drawn with dashed lines)</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/MakeConnected.gif"></td>
+<td>Click this button or choose <b>Make Biconnected</b> from the Operation Menu to Biconnect the current graph.
+    The resulting graph will have no separator nodes. A separator node is a node through which every path between a pair of nodes must pass. This will only work for planar graphs.(<b>Note</b>: The edges added by this operation are drawn with dashed lines)</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/MakeMaximal.gif"></td>
+<td>Click this button or choose <b>Make Maximal</b> from the Operation Menu to triangulate (or make maximal planar) the current graph.
+    The resulting graph with n nodes will have exactly 3n-6 edges and every face (including the outer-face) will be a triangle. This will only work for planar graphs.(<b>Note</b>: The edges added by this operation are drawn with dashed lines)</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/StraightLineEmbed.gif"></td>
+<td>Click this button or choose <b>Straight Line Embed</b> from the Operation Menu to replace the current graph by its planar straight line grid embedding.
+    A planar straight line grid embedding is an alternate, edge-crossing-free drawing of a planar graph with n nodes such that each of the nodes are placed at points in an n-2 by n-2 grid. This will only work for planar graphs.
+    (<b>Note</b>: Generated (dashed) edges are removed by this operation)</td>
+</tr></table>
+<h3>Display Commands</h3>
+<table><tr>
+<td><img src="../images/DefaultDisplay.gif"></td>
+<td>Click this button or choose <b>Default</b> from the Display Menu to reset the display to the default state.
+    (The color of all Nodes and Edges is reset to the default color.)</td>
+</tr></table>
+<table><tr>
+<td><img src="../images/DFSDisplay.gif"></td>
+<td>Click this button or choose <b>Depth First Search</b> from the Display Menu to display a depth first search
+    of the current graph starting from an arbitrary node.<br>
+    A depth first search is a tree-shaped traversal of all the nodes of the graph in depth first order.</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/BiconnectedDisplay.gif"></td>
+<td>Click this button or choose <b>Biconnected Components</b> from the Display Menu to display each of the
+    biconnected components (sub-graphs) of the current graph in a different (random) colour.<br>
+    Separator nodes (drawn in red with a black X) are nodes through which every path between a pair of nodes must pass.<br>
+    A biconnected component is a subgraph of a graph which does not contain any (internal) separator nodes.</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/STDisplay.gif"></td>
+<td>Click this button or choose <b>ST Numbering</b> from the Display Menu to display an ST-Numbering of each
+    of the biconnected components (sub-graphs) of the current graph in a different (random) colour.<br>
+    Separator nodes (drawn in red with a black X) are nodes through which every path between a pair of nodes must pass.<br>
+    A biconnected component is a subgraph of a graph which does not contain any (internal) separator nodes.<br>
+    An ST-Numbering is a numbering of every node in a biconnected sub-graph such that every node has a
+    neighbouring node with a smaller ST-Number and a neighbouring node with a larger ST-Number. (Except for the first
+    [label 1] and last [label n for n nodes] node which are neighbours).</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/CanonicalDisplay.gif"></td>
+<td>Click this button or choose <b>Canonical Ordering</b> from the Display Menu to display an Canonical Ordering or
+    Numbering of the current graph (after it has been made maximal planar).<br>
+    A canonical ordering (of planar graphs only) is a numbering of the nodes in a maximal planar graph such that
+    removing each one (with incident edges) in this order will always leave a biconnected graph behind.</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/NormalDisplay.gif"></td>
+<td>Click this button or choose <b>Normal Labeling</b> from the Display Menu to display a Normal Labeling
+    of the current graph (after it has been made maximal planar).<br>
+    A normal labeling (of planar graphs only) is a grouping of the edges in a maximal planar graph into
+    three upward directed trees such that each node in the graph has a distinct path along the edges of
+    each tree to each of the three nodes on the outer face (roots of each tree).<br>
+    At each node, the edges are in the order: entering in red, leaving in green, entering in blue,
+    leaving in red, entering in green, leaving in blue.</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/SchnyderDisplay.gif"></td>
+<td>Click this button or choose <b>Schnyder Embedding</b> from the Display Menu to display a Schnyder
+    Straight Line Grid Embedding of the current graph (after it has been made maximal planar).<br>
+    A schnyder straight line grid embedding is a drawing of a planar graph such that all edges are drawn
+    without crossings as a straight line, and all of the n nodes have integer coordinates on a n-2 by n-2
+    grid.</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/MSTDisplay.gif"></td>
+<td>Click this button or choose <b>Minimum Spanning Tree</b> from the Display Menu to display a Minimum
+    (Edge Length) Spanning Tree of the current graph (after it has been made connected).<br>
+    A minimum spanning tree is a tree (no cycles or loops) made up of edges from the graph which visits
+    every node in the graph using the shortest possible distances.</td>
+</tr></table>
+<table><tr>
+<td valign="top"><img src="../images/SPDisplay.gif"></td>
+<td>Click this button or choose <b>Dijkstra Shortest Path</b> from the Display Menu to display the Shortest
+    Path between any two nodes..</td>
+</tr></table>
+</body>
+</html>
