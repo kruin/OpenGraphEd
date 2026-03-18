@@ -1,14 +1,8 @@
 # OpenGraphEd
 
-Modernized and extended graph editor based on **JGraphEd**.
-
-OpenGraphEd continues from a JGraphEd-based codebase and adds integration, cleanup, adaptation for modern Java, and room for further development.
-
-## Origin and credits
-
 OpenGraphEd is based on the original **JGraphEd** code line.
 
-This repository builds on the JGraphEd tradition and continues it in a modernized and extended form.
+This repository builds on the JGraphEd by adding a specific case. Let a structure consist of open nodes and extended forms.
 
 Reference repository:  
 [Graph-JGraphEd](https://github.com/kruin/Graph-JGraphEd)
