@@ -1419,15 +1419,11 @@ public class EditListener extends GraphEditorListener implements ActionListener,
     {
       layerInited = true;
       Container container = editor.getTopLevelAncestor();
-      if ( container instanceof JFrame )
+      if ( container instanceof RootPaneContainer )
       {
-        layeredPane = ((JFrame)container).getLayeredPane();
-        rootPane = ((JFrame)container).getRootPane();
-      }
-      else if ( container instanceof JApplet )
-      {
-        layeredPane = ((JApplet)container).getLayeredPane();
-        rootPane = ((JApplet)container).getRootPane();
+        RootPaneContainer rootPaneContainer = (RootPaneContainer)container;
+        layeredPane = rootPaneContainer.getLayeredPane();
+        rootPane = rootPaneContainer.getRootPane();
       }
       else
       {

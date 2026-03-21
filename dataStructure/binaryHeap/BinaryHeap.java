@@ -20,14 +20,16 @@ public class BinaryHeap
   }
 
   /*
-   * Destructor for a BinaryHeap.
+   * Clears the BinaryHeap and releases its internal node references.
    */
-  public void finalize()
+  public void clear()
   {
     if ( !isEmpty() )
     {
       min.deleteRecurse();
       min = null;
+      last = null;
+      size = 0;
     }
   }
 

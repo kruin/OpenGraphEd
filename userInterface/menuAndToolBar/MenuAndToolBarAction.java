@@ -45,7 +45,7 @@ public class MenuAndToolBarAction extends AbstractAction implements java.io.Seri
     {
       try
       {
-        method.invoke(controller, null);
+        method.invoke(controller);
         controller.update();
       }
       catch ( Exception ex )

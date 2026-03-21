@@ -127,14 +127,14 @@ public class PQTree
     {
       if ( universeSize == 1 )
       {
-        root.setData(new Integer(0));
+        root.setData(Integer.valueOf(0));
         leaves.addElement(root);
       }
       else
       {
         for ( i=0; i<universeSize; i++ )
         {
-          aNode = new PQNode(new Integer(i));
+          aNode = new PQNode(Integer.valueOf(i));
           root.addChild(aNode);
           leaves.addElement(aNode);
         }

@@ -343,7 +343,7 @@ public class MenuAndToolBar
         icon = new ImageIcon(MenuAndToolBar.class.getResource(iconString));
       }
       String desc = tok.nextToken();
-      Integer mnemonic = new Integer(getKeyCode(tok.nextToken()));
+      Integer mnemonic = Integer.valueOf(getKeyCode(tok.nextToken()));
       String enabledString = tok.nextToken();
       boolean enabled;
       if ( enabledString.equals("isApplication") )
@@ -358,7 +358,7 @@ public class MenuAndToolBar
       Method method = null;
       try
       {
-        method = GraphController.class.getDeclaredMethod(tok.nextToken(), null);
+        method = GraphController.class.getDeclaredMethod(tok.nextToken());
       }
       catch (NoSuchMethodException nsme)
       {
@@ -377,7 +377,7 @@ public class MenuAndToolBar
         String text = tok.nextToken();
         ImageIcon icon = new ImageIcon(MenuAndToolBar.class.getResource(tok.nextToken()));
         String desc = tok.nextToken();
-        Integer mnemonic = new Integer(getKeyCode(tok.nextToken()));
+        Integer mnemonic = Integer.valueOf(getKeyCode(tok.nextToken()));
         boolean enabled = Boolean.valueOf(tok.nextToken()).booleanValue();
         int width = Integer.parseInt(tok.nextToken());
         int numChildren = Integer.parseInt(tok.nextToken());

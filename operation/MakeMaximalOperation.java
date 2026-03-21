@@ -76,7 +76,7 @@ public class MakeMaximalOperation
           {
             if ( !run )
             {
-              duplicateEdgeRunIndices.addElement(new Integer(i));
+              duplicateEdgeRunIndices.addElement(Integer.valueOf(i));
             }
             run = true;
           }
