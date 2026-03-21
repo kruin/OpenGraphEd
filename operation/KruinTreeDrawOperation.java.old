@@ -13,12 +13,6 @@ import operation.opentree.*;
 
 public class KruinTreeDrawOperation
 {
-  /**
-   * Keep one empty grid column between the root axis and each child box.
-   * This preserves the open-tree character while keeping the reserved box minimal.
-   */
-  private static final int ROOT_SIDE_GAP = 1;
-
   public static void displayKruinTreeDrawing(Graph g, Node root, int method,
                                             int width, int height) throws Exception
   {
@@ -86,7 +80,7 @@ public class KruinTreeDrawOperation
         int gridWidth = rootEx.getBoundWidth();
         int gridHeight = rootEx.getBoundHeight();
 
-        correctGridCoordinates(rootEx, 2 + rootEx.getBoundX(), 2);
+        correctGridCoordinates(rootEx, 2 + gridWidth, 2);
 
         // --- OPEN LANGUAGE TREE DEBUG / TEST ---
         debugOpenLanguageProjection(rootEx);
@@ -94,8 +88,7 @@ public class KruinTreeDrawOperation
 
         int widthIncrement = 20;//doubled in graphcontroller-kruinGridMode()
         int heightIncrement = 20;//ditto, or KruinDialog-WIDTH 400
-        g.setGridArea(gridHeight + 5, heightIncrement,
-                      gridWidth + 5, widthIncrement, true);
+        g.setGridArea(gridWidth+1, widthIncrement,gridHeight+1, heightIncrement, true);
 
         KruinNodeEx aNode;
         KruinEdgeEx anEdge;
@@ -124,8 +117,7 @@ public class KruinTreeDrawOperation
           aNode = (KruinNodeEx)nodes.elementAt(i);
 
           matrixNode = g.createNode(new Location(10, aNode.getGridY()*heightIncrement));
-          if ( aNode.getSubTreeSize() == 1 )
-          {
+          if ( aNode.getSubTreeSize() == 1 ){
             g.changeNodeLabel(matrixNode, aNode.getIndex()+": "+ aNode.getLabel(), true);
             g.changeNodeColor(matrixNode, Color.green, true);
           }
@@ -180,7 +172,11 @@ public class KruinTreeDrawOperation
   {
     if ( root.getSubTreeSize() == 1 )
     {
-      initializeLeaf(root);
+      root.setGridX(0);
+      root.setGridY(0);
+
+      root.setBoundWidth(0);
+      root.setBoundHeight(0);
     }
     else
     {
@@ -195,99 +191,38 @@ public class KruinTreeDrawOperation
 
   private static void domainTreeMethod(KruinNodeEx root)
   {
-    KruinNodeEx leftChild = root.getLeftChild();
-    KruinNodeEx rightChild = root.getRightChild();
-
-    if ( leftChild == null && rightChild == null )
+    if ( root.getSubTreeSize() == 1 )
     {
-      initializeLeaf(root);
-    }
-    else
-    {
-      if ( leftChild != null )
-      {
-        domainTreeMethod(leftChild);
-      }
-      if ( rightChild != null )
-      {
-        domainTreeMethod(rightChild);
-      }
+      root.setGridX(0);
+      root.setGridY(0);
 
-      if ( leftChild != null && rightChild != null )
-      {
-        if (!(root.getNode().isSelected()))
-        {
-          domainRule(root, leftChild, rightChild);
-        }
-        else
-        {
-          root.setLabel("Focus -"+root.getLabel());
-          domainRule(root, rightChild, leftChild);
-        }
-      }
-      else if ( leftChild != null )
-      {
-        otherRule(root, leftChild);
-      }
-      else
-      {
-        otherRule(root, rightChild);
+      root.setBoundWidth(0);
+      root.setBoundHeight(0);
+
+    } else {
+      domainTreeMethod(root.getLeftChild());
+      domainTreeMethod(root.getRightChild());
+      if (!(root.getNode().isSelected())) {
+        domainRule(root,root.getLeftChild(),root.getRightChild());
+      } else {
+        root.setLabel("Focus -"+root.getLabel());
+        domainRule(root,root.getRightChild(),root.getLeftChild());
       }
     }
   }
 
-  private static void initializeLeaf(KruinNodeEx root)
+  static void domainRule( KruinNodeEx root,KruinNodeEx left,KruinNodeEx right )
   {
+    int shiftLeft = left.getBoundWidth();
+    left.shiftX(-1*(shiftLeft+1));
+    left.shiftY(shiftLeft+1);     /*45 degrees, same shift, */
+    int shiftRight = shiftLeft + 2 + left.getBoundWidth();
+    right.shiftX(shiftRight);
+    right.shiftY(shiftRight);
     root.setGridX(0);
     root.setGridY(0);
-    root.setBoundX(0);
-    root.setBoundY(0);
-    root.setBoundWidth(0);
-    root.setBoundHeight(0);
-  }
-
-  /**
-   * Bottom-up box integration for the Kruin layout.
-   *
-   * Strategy:
-   * 1. each child already owns its smallest reserved bounding box;
-   * 2. place the left child box completely to the left of the root axis;
-   * 3. place the right child box completely to the right of the root axis;
-   * 4. place both children below the root, with a vertical offset based on the height
-   *    of their already reserved box.
-   *
-   * This keeps the tree open, prevents nodes from collapsing onto one axis,
-   * and computes the parent box exactly as the union of the reserved child boxes.
-   */
-  static void domainRule( KruinNodeEx root, KruinNodeEx left, KruinNodeEx right )
-  {
-    int leftShiftX = -(rightExtent(left) + ROOT_SIDE_GAP);
-    int leftShiftY = 1;
-
-    /**
-     * Place the right subtree below the full reserved box of the left subtree.
-     * This preserves the Kruin character: growth in width AND depth.
-     * It also prevents sibling leaves from ending up on the same grid line.
-     */
-    int rightShiftX = leftExtent(right) + ROOT_SIDE_GAP;
-    int rightShiftY = leftShiftY + left.getBoundHeight() + 1;
-
-    left.shiftX(leftShiftX);
-    left.shiftY(leftShiftY);
-
-    right.shiftX(rightShiftX);
-    right.shiftY(rightShiftY);
-
-    int minX = Math.min(0, Math.min(boxMinX(left), boxMinX(right)));
-    int maxX = Math.max(0, Math.max(boxMaxX(left), boxMaxX(right)));
-    int maxY = Math.max(0, Math.max(boxMaxY(left), boxMaxY(right)));
-
-    root.setGridX(0);
-    root.setGridY(0);
-    root.setBoundX(-minX);
-    root.setBoundY(0);
-    root.setBoundWidth(maxX - minX);
-    root.setBoundHeight(maxY);
+    root.setBoundWidth(root.getBoundWidth()+ shiftLeft+1+1+ shiftRight);
+    root.setBoundHeight(root.getBoundHeight() + shiftLeft +1+1+ shiftRight);
   }
 
   private static KruinNodeEx findLastNodeWithSizeGreaterThan(KruinNodeEx root, double num)
@@ -318,43 +253,13 @@ public class KruinTreeDrawOperation
 
   private static void otherRule( KruinNodeEx root, KruinNodeEx child )
   {
-    child.shiftY(child.getBoundHeight() + 1);
-
-    int minX = Math.min(0, boxMinX(child));
-    int maxX = Math.max(0, boxMaxX(child));
-    int maxY = Math.max(0, boxMaxY(child));
-
+    child.shiftY(1);
     root.setGridX(0);
     root.setGridY(0);
-    root.setBoundWidth(maxX - minX);
-    root.setBoundHeight(maxY);
-    root.setBoundX(-minX);
+    root.setBoundWidth(child.getBoundWidth());
+    root.setBoundHeight(child.getBoundHeight()+1);
+    root.setBoundX(child.getBoundX());
     root.setBoundY(0);
-  }
-
-  private static int leftExtent(KruinNodeEx node)
-  {
-    return node.getBoundX();
-  }
-
-  private static int rightExtent(KruinNodeEx node)
-  {
-    return node.getBoundWidth() - node.getBoundX();
-  }
-
-  private static int boxMinX(KruinNodeEx node)
-  {
-    return node.getGridX() - node.getBoundX();
-  }
-
-  private static int boxMaxX(KruinNodeEx node)
-  {
-    return node.getGridX() + node.getBoundWidth() - node.getBoundX();
-  }
-
-  private static int boxMaxY(KruinNodeEx node)
-  {
-    return node.getGridY() + node.getBoundHeight();
   }
 
   private static double log2(double x)
