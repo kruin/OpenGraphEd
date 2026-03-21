@@ -2,22 +2,33 @@ import java.awt.*;
 import javax.swing.*;
 import userInterface.*;
 
-public class JGraphEdApplet extends JApplet
+public class JGraphEdApplet extends JPanel
 {
   public static final int WIDTH = 700;
   public static final int HEIGHT = 550;
 
   private GraphController controller;
+  private JMenuBar menuBar;
+
+  public JGraphEdApplet()
+  {
+    init();
+  }
 
   public void init()
   {
     controller = new GraphController(false);
 
-    getContentPane().setLayout(new BorderLayout());
-    getContentPane().add(controller.getToolBar(), BorderLayout.NORTH);
-    getContentPane().add(controller.getGraphWindow(), BorderLayout.CENTER);
+    setLayout(new BorderLayout());
+    add(controller.getToolBar(), BorderLayout.NORTH);
+    add(controller.getGraphWindow(), BorderLayout.CENTER);
 
-    setJMenuBar(controller.getMenuBar());
+    menuBar = controller.getMenuBar();
     setVisible(true);
+  }
+
+  public JMenuBar getAppletMenuBar()
+  {
+    return menuBar;
   }
 }

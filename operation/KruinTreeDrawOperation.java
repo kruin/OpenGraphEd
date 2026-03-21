@@ -353,7 +353,7 @@ public class KruinTreeDrawOperation
       node.deferPlacement();
     }
 
-    nodeMap.put(new Integer(node.getId()), node);
+    nodeMap.put(Integer.valueOf(node.getId()), node);
 
     KruinNodeEx left = source.getLeftChild();
     KruinNodeEx right = source.getRightChild();
