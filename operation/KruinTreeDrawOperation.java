@@ -16,113 +16,121 @@ public class KruinTreeDrawOperation
   public static void displayKruinTreeDrawing(Graph g, Node root, int method,
                                             int width, int height) throws Exception
   {
-      root.setSpecialSelected(true);
+    boolean oldSpecialSelected = root.isSpecialSelected();
+    root.setSpecialSelected(true);
     LogEntry logEntry = g.startLogEntry("Kruin Tree Drawing");
-    if ( !ConnectivityOperation.isConnected(g) )
+    try
     {
-      logEntry.setData("Graph was not connected");
-      g.stopLogEntry(logEntry);
-      throw new GraphException("Graph is not connected!");
-    }
-    else if ( TreeOperation.hasCycles(g) )
-    {
-      logEntry.setData("Graph had cycles");
-      g.stopLogEntry(logEntry);
-      throw new GraphException("Graph has Cycles!");
-    }
-    else if ( method != 4 && !TreeOperation.isBinaryTree(g, root) )
-    {
-      logEntry.setData("Graph was not a Binary Tree");
-      g.stopLogEntry(logEntry);
-      throw new GraphException("Graph is not a Binary Tree!");
-    }
-    else
-    {
-      Vector nodes = g.createNodeExtenders(KruinNodeEx.class);
-      Vector edges = g.createEdgeExtenders(KruinEdgeEx.class);
-      KruinNodeEx rootEx = (KruinNodeEx)root.getExtender();
-
-      buildTree(rootEx);
-
-      /**
-       * Method 1-4: https://docs.google.com/#folders/folder.0.0BzkqeCBoFVgzY2FlMTcyMjQtMWI0Zi00OGMwLWFjODktYzA5ZjhhY2Q2MGI4
-       * (Dutch)
-       */
-      if ( method == 1 )
+      if ( !ConnectivityOperation.isConnected(g) )
       {
-        domainTreeMethod(rootEx);
+        logEntry.setData("Graph was not connected");
+        g.stopLogEntry(logEntry);
+        throw new GraphException("Graph is not connected!");
       }
-      else if ( method == 2 )
+      else if ( TreeOperation.hasCycles(g) )
       {
-    //    inwardTreeMethod(g, rootEx);
+        logEntry.setData("Graph had cycles");
+        g.stopLogEntry(logEntry);
+        throw new GraphException("Graph has Cycles!");
       }
-      else if ( method == 3 )
+      else if ( method != 4 && !TreeOperation.isBinaryTree(g, root) )
       {
-    //	  thirdMethod(g, rootEx);
-   //     compactTreeMethod(g, rootEx);
-      }
-      else if ( method == 4 )
-      {
-   //     verticalTreeMethod(g, rootEx);
-      }
-      else if ( method == 5 )
-      {
-        drawnTreeMethod(g, rootEx);
+        logEntry.setData("Graph was not a Binary Tree");
+        g.stopLogEntry(logEntry);
+        throw new GraphException("Graph is not a Binary Tree!");
       }
       else
       {
-        return;
-      }
+        Vector nodes = g.createNodeExtenders(KruinNodeEx.class);
+        Vector edges = g.createEdgeExtenders(KruinEdgeEx.class);
+        KruinNodeEx rootEx = (KruinNodeEx)root.getExtender();
 
-      int gridWidth = rootEx.getBoundWidth();
-      int gridHeight = rootEx.getBoundHeight();
+        buildTree(rootEx);
 
-      correctGridCoordinates(rootEx, 2 + gridWidth, 2);
-
-      // --- OPEN LANGUAGE TREE DEBUG / TEST ---
-      debugOpenLanguageProjection(rootEx);
-      // --- END OPEN LANGUAGE TREE DEBUG / TEST ---
-
-      int widthIncrement = 20;//doubled in graphcontroller-kruinGridMode()
-      int heightIncrement = 20;//ditto, or KruinDialog-WIDTH 400
-      g.setGridArea(gridWidth+1, widthIncrement,gridHeight+1, heightIncrement, true);
-
-      KruinNodeEx aNode;
-      KruinEdgeEx anEdge;
-      for ( int i=0; i<nodes.size(); i++ )
-      {
-        aNode = (KruinNodeEx)nodes.elementAt(i);
-        g.relocateNode( aNode.getRef(),
-                        new Location( aNode.getGridX()*widthIncrement,
-                                      aNode.getGridY()*heightIncrement ),
-                        true );
-
-        aNode.setLabel("#"+i+"#"+ aNode.getLabel() );
-        aNode.setColor(Color.yellow);
-      }
-
-      for ( int i=0; i<edges.size(); i++ )
-      {
-        anEdge = (KruinEdgeEx)edges.elementAt(i);
-        g.straightenEdge(anEdge.getRef(), true);
-      }
-
-      Node matrixNode;
-
-      for ( int i=0; i<nodes.size(); i++ )
-      {
-        aNode = (KruinNodeEx)nodes.elementAt(i);
-
-        matrixNode = g.createNode(new Location(10, aNode.getGridY()*heightIncrement));
-        if ( aNode.getSubTreeSize() == 1 ){
-          matrixNode.setLabel(aNode.getIndex()+": "+ aNode.getLabel());
-          matrixNode.setColor(Color.green);
+        /**
+         * Method 1-4: https://docs.google.com/#folders/folder.0.0BzkqeCBoFVgzY2FlMTcyMjQtMWI0Zi00OGMwLWFjODktYzA5ZjhhY2Q2MGI4
+         * (Dutch)
+         */
+        if ( method == 1 )
+        {
+          domainTreeMethod(rootEx);
+        }
+        else if ( method == 2 )
+        {
+      //    inwardTreeMethod(g, rootEx);
+        }
+        else if ( method == 3 )
+        {
+      //    thirdMethod(g, rootEx);
+     //     compactTreeMethod(g, rootEx);
+        }
+        else if ( method == 4 )
+        {
+     //     verticalTreeMethod(g, rootEx);
+        }
+        else if ( method == 5 )
+        {
+          drawnTreeMethod(g, rootEx);
+        }
+        else
+        {
+          return;
         }
 
-        matrixNode = g.createNode(new Location(aNode.getGridX()*widthIncrement,10));
-        matrixNode.setColor(Color.orange);
+        int gridWidth = rootEx.getBoundWidth();
+        int gridHeight = rootEx.getBoundHeight();
+
+        correctGridCoordinates(rootEx, 2 + gridWidth, 2);
+
+        // --- OPEN LANGUAGE TREE DEBUG / TEST ---
+        debugOpenLanguageProjection(rootEx);
+        // --- END OPEN LANGUAGE TREE DEBUG / TEST ---
+
+        int widthIncrement = 20;//doubled in graphcontroller-kruinGridMode()
+        int heightIncrement = 20;//ditto, or KruinDialog-WIDTH 400
+        g.setGridArea(gridWidth+1, widthIncrement,gridHeight+1, heightIncrement, true);
+
+        KruinNodeEx aNode;
+        KruinEdgeEx anEdge;
+        for ( int i=0; i<nodes.size(); i++ )
+        {
+          aNode = (KruinNodeEx)nodes.elementAt(i);
+          g.relocateNode( aNode.getRef(),
+                          new Location( aNode.getGridX()*widthIncrement,
+                                        aNode.getGridY()*heightIncrement ),
+                          true );
+
+          g.changeNodeLabel(aNode.getRef(), "#"+i+"#"+ aNode.getLabel(), true);
+          g.changeNodeColor(aNode.getRef(), Color.yellow, true);
+        }
+
+        for ( int i=0; i<edges.size(); i++ )
+        {
+          anEdge = (KruinEdgeEx)edges.elementAt(i);
+          g.straightenEdge(anEdge.getRef(), true);
+        }
+
+        Node matrixNode;
+
+        for ( int i=0; i<nodes.size(); i++ )
+        {
+          aNode = (KruinNodeEx)nodes.elementAt(i);
+
+          matrixNode = g.createNode(new Location(10, aNode.getGridY()*heightIncrement));
+          if ( aNode.getSubTreeSize() == 1 ){
+            g.changeNodeLabel(matrixNode, aNode.getIndex()+": "+ aNode.getLabel(), true);
+            g.changeNodeColor(matrixNode, Color.green, true);
+          }
+
+          matrixNode = g.createNode(new Location(aNode.getGridX()*widthIncrement,10));
+          g.changeNodeColor(matrixNode, Color.orange, true);
+        }
+        g.stopLogEntry(logEntry);
       }
-      g.stopLogEntry(logEntry);
+    }
+    finally
+    {
+      root.setSpecialSelected(oldSpecialSelected);
     }
   }
 
