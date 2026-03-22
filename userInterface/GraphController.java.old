@@ -310,6 +310,11 @@ public class GraphController implements InternalFrameListener
           String fileExt = Utils.getExtension(fc.getSelectedFile());
           if ( fc.getFileFilter() == graphFilter )
           {
+            if ( fileExt == null )
+            {
+              savePath = savePath + ".graph";
+              fileExt = Utils.graph;
+            }
             if ( fileExt != null && fileExt.equalsIgnoreCase(Utils.graph) )
             {
               File aFile = new File(savePath);
@@ -1278,15 +1283,21 @@ public class GraphController implements InternalFrameListener
       KruinDialog ged = new KruinDialog( this,
       activeGraphEditorWindow,
       "Kruin Tree Drawing Display",
-      "<html>Please Select which Drawing Method to Use<br>and Select the Root Node of the Tree</html>" )
+      "<html>Select structure type, then Run or Save OTS.</html>" )
       {
         public void actionPerformed(ActionEvent e)
         {
-          displayKruinTreeHelper(getOwner(), this);
+          if ( "Save OTS".equals(e.getActionCommand()) )
+          {
+            saveKruinSimpleOTSHelper(getOwner(), this);
+          }
+          else
+          {
+            displayKruinTreeHelper(getOwner(), this);
+          }
         }
       };
-      ged.disableRunButton();
-      activeGraphEditorWindow.getGraphEditor().allowNodeSelection(1);
+      activeGraphEditorWindow.getGraphEditor().allowNodeSelection(0);
       activeGraphEditorWindow.setDialog(ged);
       graphWindow.showDialog(ged);
     }
@@ -1294,32 +1305,22 @@ public class GraphController implements InternalFrameListener
 
   private void displayKruinTreeHelper(GraphEditorWindow editorWindow, KruinDialog dialog)
   {
-    Node[] selectedRoots = editorWindow.getGraphEditor().getSpecialNodeSelections();
-
-    if ( selectedRoots == null || selectedRoots.length == 0 || selectedRoots[0] == null )
-    {
-      JOptionPane.showMessageDialog(graphWindow,
-                                    "Select exactly one root node before pressing Run.",
-                                    "No Root Node Selected",
-                                    JOptionPane.WARNING_MESSAGE);
-      return;
-    }
-
     try
     {
-      editorWindow.getGraphEditor().getGraph().newMemento("Display KruinDomain Tree Drawing");
+      Graph graph = editorWindow.getGraphEditor().getGraph();
+      int rootIndex = getKruinRootIndex(editorWindow);
+      graph.newMemento("Display Open Tree Simple Drawing");
       KruinTreeDrawOperation.displayKruinTreeDrawing(
-        editorWindow.getGraphEditor().getGraph(),
-        selectedRoots[0],
+        graph,
+        graph.getNodeAt(rootIndex),
         dialog.getSelectedMethodNumber(),
         editorWindow.getGraphEditor().getDrawWidth(),
         editorWindow.getGraphEditor().getDrawHeight() );
-   //   editorWindow.getGraphEditor().setPreferredSize();
       editorWindow.getGraphEditor().update();
       editorWindow.getGraphEditor().allowNodeSelection(0);
       graphWindow.close(editorWindow.getDialog());
       editorWindow.setDialog(null);
-      editorWindow.getGraphEditor().getGraph().doneMemento();
+      graph.doneMemento();
       newUndo();
     }
     catch ( Exception e )
@@ -1330,8 +1331,206 @@ public class GraphController implements InternalFrameListener
       }
       editorWindow.getGraphEditor().getGraph().abortMemento();
       JOptionPane.showMessageDialog(graphWindow, e.getMessage(),
-                                    "Error During Domain Tree Drawing Display", JOptionPane.ERROR_MESSAGE);
+                                    "Error During Open Tree Simple Display", JOptionPane.ERROR_MESSAGE);
     }
+  }
+
+  private void saveKruinSimpleOTSHelper(GraphEditorWindow editorWindow, KruinDialog dialog)
+  {
+    if ( dialog.getStructureType() != KruinDialog.STRUCTURE_SIMPLE_TREE )
+    {
+      JOptionPane.showMessageDialog(graphWindow,
+                                    "Save OTS is currently available only for Structure Type Simple.",
+                                    "Save OTS",
+                                    JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
+    try
+    {
+      Graph sourceGraph = editorWindow.getGraphEditor().getGraph();
+      int rootIndex = getKruinRootIndex(editorWindow);
+      Graph otsGraph = cloneGraph(sourceGraph);
+      KruinTreeDrawOperation.displayKruinTreeDrawing(
+        otsGraph,
+        otsGraph.getNodeAt(rootIndex),
+        dialog.getSelectedMethodNumber(),
+        editorWindow.getGraphEditor().getDrawWidth(),
+        editorWindow.getGraphEditor().getDrawHeight() );
+      saveOTSGraph(sourceGraph, otsGraph);
+    }
+    catch ( Exception e )
+    {
+      if ( !(e instanceof GraphException) )
+      {
+        e.printStackTrace();
+      }
+      JOptionPane.showMessageDialog(graphWindow, e.getMessage(),
+                                    "Error During Save OTS", JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
+  private int getKruinRootIndex(GraphEditorWindow editorWindow)
+  {
+    Graph graph = editorWindow.getGraphEditor().getGraph();
+    Node[] selectedRoots = editorWindow.getGraphEditor().getSpecialNodeSelections();
+    if ( selectedRoots != null && selectedRoots.length > 0 && selectedRoots[0] != null )
+    {
+      int selectedIndex = findNodeIndex(graph, selectedRoots[0]);
+      if ( selectedIndex >= 0 )
+      {
+        return selectedIndex;
+      }
+    }
+    return 0;
+  }
+
+  private int findNodeIndex(Graph graph, Node target)
+  {
+    for ( int i=0; i<graph.getNumNodes(); i++ )
+    {
+      if ( graph.getNodeAt(i) == target )
+      {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  private Graph cloneGraph(Graph sourceGraph) throws Exception
+  {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    sourceGraph.saveTo(pw);
+    pw.close();
+
+    BufferedReader reader = new BufferedReader(new StringReader(sw.toString()));
+    Graph cloned = Graph.loadFrom(reader);
+    reader.close();
+    return cloned;
+  }
+
+  private void saveOTSGraph(Graph sourceGraph, Graph otsGraph) throws Exception
+  {
+    String sourcePath = tryGetGraphFilePath(sourceGraph);
+    String suggestedPath = null;
+    String savePath = null;
+
+    if ( sourcePath != null && sourcePath.length() > 0 )
+    {
+      suggestedPath = deriveOTSPath(sourcePath);
+    }
+    else
+    {
+      suggestedPath = new File(System.getProperty("user.dir"), "OTS_graph.graph").getCanonicalPath();
+    }
+
+    JFileChooser fc = new JFileChooser();
+    GraphFilter graphFilter = new GraphFilter();
+    fc.addChoosableFileFilter(graphFilter);
+    fc.setFileFilter(graphFilter);
+    fc.setFileView(new GraphFileView());
+
+    File suggestedFile = new File(suggestedPath);
+    File parentDir = suggestedFile.getParentFile();
+    if ( parentDir != null && parentDir.exists() )
+    {
+      fc.setCurrentDirectory(parentDir);
+    }
+    else
+    {
+      fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+    }
+    fc.setSelectedFile(new File(suggestedFile.getName()));
+    fc.setDialogTitle("Save OTS Graph");
+    fc.setApproveButtonText("Save OTS");
+    fc.setApproveButtonToolTipText("OTS = Open Tree Simple Version");
+
+    JPanel accessory = new JPanel(new BorderLayout());
+    accessory.add(new JLabel("<html><b>OTS</b> = Open Tree Simple Version<br>Suggested result name starts with <b>OTS_</b>.</html>"),
+                  BorderLayout.NORTH);
+    fc.setAccessory(accessory);
+
+    int returnVal = fc.showSaveDialog(graphWindow);
+    if ( returnVal != JFileChooser.APPROVE_OPTION )
+    {
+      return;
+    }
+
+    savePath = fc.getSelectedFile().getCanonicalPath();
+    String fileExt = Utils.getExtension(fc.getSelectedFile());
+    if ( fileExt == null )
+    {
+      savePath = savePath + ".graph";
+      fileExt = Utils.graph;
+    }
+    if ( fileExt == null || !fileExt.equalsIgnoreCase(Utils.graph) )
+    {
+      JOptionPane.showMessageDialog(graphWindow,
+                                    "OTS graphs may only be saved as .graph files.",
+                                    "Unable to Save OTS Graph",
+                                    JOptionPane.ERROR_MESSAGE);
+      return;
+    }
+    if ( !confirmOverwriteIfNeeded(savePath) )
+    {
+      return;
+    }
+
+    PrintWriter writer = new PrintWriter(new FileWriter(savePath));
+    otsGraph.saveTo(writer);
+    writer.close();
+
+    JOptionPane.showMessageDialog(graphWindow,
+                                  "Open Tree Simple Version saved to:\n" + savePath,
+                                  "Save OTS",
+                                  JOptionPane.INFORMATION_MESSAGE);
+  }
+
+  private boolean confirmOverwriteIfNeeded(String savePath)
+  {
+    File aFile = new File(savePath);
+    if ( aFile.exists() )
+    {
+      int returnInt = JOptionPane.showConfirmDialog(graphWindow,
+                        "Do you wish to Overwrite the file " + savePath + "?",
+                        "File Already Exists",
+                        JOptionPane.YES_NO_OPTION);
+      return returnInt == JOptionPane.YES_OPTION;
+    }
+    return true;
+  }
+
+  private String deriveOTSPath(String sourcePath)
+  {
+    File sourceFile = new File(sourcePath);
+    String name = sourceFile.getName();
+    File parent = sourceFile.getParentFile();
+    if ( !name.startsWith("OTS_") )
+    {
+      name = "OTS_" + name;
+    }
+    if ( parent != null )
+    {
+      return new File(parent, name).getPath();
+    }
+    return name;
+  }
+
+  private String tryGetGraphFilePath(Graph graph)
+  {
+    try
+    {
+      java.lang.reflect.Method method = graph.getClass().getMethod("getFilePath", new Class[0]);
+      Object value = method.invoke(graph, new Object[0]);
+      if ( value instanceof String )
+      {
+        return (String)value;
+      }
+    }
+    catch ( Exception e )
+    {
+    }
+    return null;
   }
 
 

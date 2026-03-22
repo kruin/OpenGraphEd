@@ -1,115 +1,22 @@
+
 package operation;
 
 import graphException.*;
 import graphStructure.*;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 import operation.extenders.*;
-import operation.opentree.*;
 
 public class KruinTreeDrawOperation
 {
-  public static final int STRUCTURE_TYPE_SIMPLE_TREE = 1;
-  public static final int STRUCTURE_TYPE_LANGUAGE_TREE = 2;
-  public static final int STRUCTURE_TYPE_ANAPHOR_TREE = 3;
+  private static final int DRAWING_OFFSET_X = 4;
+  private static final int DRAWING_OFFSET_Y = 4;
 
+  /**
+   * Keep one empty grid column between the root axis and each child box.
+   * This preserves the open-tree character while keeping the reserved box minimal.
+   */
   private static final int ROOT_SIDE_GAP = 1;
-
-  private static int structureType = STRUCTURE_TYPE_SIMPLE_TREE;
-
-  private static boolean showProjections = true;
-  private static boolean leftProjectionEnabled = true;
-  private static boolean rightProjectionEnabled = false;
-  private static boolean topProjectionEnabled = true;
-  private static boolean bottomProjectionEnabled = false;
-
-  private static int structureOffsetFromLeft = 2;
-  private static int structureOffsetFromRight = 2;
-  private static int structureOffsetFromTop = 2;
-  private static int structureOffsetFromBottom = 2;
-
-  private static int leftProjectionPosition = 2;
-  private static int rightProjectionPosition = 30;
-  private static int topProjectionPosition = 0;
-  private static int bottomProjectionPosition = 30;
-
-  private static int gridColumnWidth = 20;
-  private static int gridRowHeight = 20;
-
-  public static void useKruinDefaults()
-  {
-    structureType = STRUCTURE_TYPE_SIMPLE_TREE;
-    showProjections = true;
-    leftProjectionEnabled = true;
-    rightProjectionEnabled = false;
-    topProjectionEnabled = true;
-    bottomProjectionEnabled = false;
-
-    structureOffsetFromLeft = 2;
-    structureOffsetFromRight = 2;
-    structureOffsetFromTop = 2;
-    structureOffsetFromBottom = 2;
-
-    leftProjectionPosition = 2;
-    rightProjectionPosition = 30;
-    topProjectionPosition = 0;
-    bottomProjectionPosition = 30;
-
-    gridColumnWidth = 20;
-    gridRowHeight = 20;
-  }
-
-  public static void usePreviousOpenStructureDefaults()
-  {
-    structureType = STRUCTURE_TYPE_SIMPLE_TREE;
-    showProjections = true;
-    leftProjectionEnabled = true;
-    rightProjectionEnabled = false;
-    topProjectionEnabled = true;
-    bottomProjectionEnabled = false;
-
-    structureOffsetFromLeft = 2;
-    structureOffsetFromRight = 2;
-    structureOffsetFromTop = 2;
-    structureOffsetFromBottom = 2;
-
-    leftProjectionPosition = 0;
-    rightProjectionPosition = 30;
-    topProjectionPosition = 0;
-    bottomProjectionPosition = 30;
-
-    gridColumnWidth = 20;
-    gridRowHeight = 20;
-  }
-
-  public static void setStructureType(int value) { structureType = value; }
-  public static void setShowProjections(boolean value) { showProjections = value; }
-  public static void setLeftProjectionEnabled(boolean value) { leftProjectionEnabled = value; }
-  public static void setRightProjectionEnabled(boolean value) { rightProjectionEnabled = value; }
-  public static void setTopProjectionEnabled(boolean value) { topProjectionEnabled = value; }
-  public static void setBottomProjectionEnabled(boolean value) { bottomProjectionEnabled = value; }
-
-  public static void setStructureOffsetFromLeft(int value) { structureOffsetFromLeft = value; }
-  public static void setStructureOffsetFromRight(int value) { structureOffsetFromRight = value; }
-  public static void setStructureOffsetFromTop(int value) { structureOffsetFromTop = value; }
-  public static void setStructureOffsetFromBottom(int value) { structureOffsetFromBottom = value; }
-
-  public static void setLeftProjectionPosition(int value) { leftProjectionPosition = value; }
-  public static void setRightProjectionPosition(int value) { rightProjectionPosition = value; }
-  public static void setTopProjectionPosition(int value) { topProjectionPosition = value; }
-  public static void setBottomProjectionPosition(int value) { bottomProjectionPosition = value; }
-
-  public static void setGridColumnWidth(int value) { gridColumnWidth = value; }
-  public static void setGridRowHeight(int value) { gridRowHeight = value; }
-
-  public static void displayKruinTreeDrawing(Graph g, Node root, int width, int height) throws Exception
-  {
-    displayKruinTreeDrawing(g, root, 1, width, height);
-  }
 
   public static void displayKruinTreeDrawing(Graph g, Node root, int method,
                                             int width, int height) throws Exception
@@ -131,7 +38,7 @@ public class KruinTreeDrawOperation
         g.stopLogEntry(logEntry);
         throw new GraphException("Graph has Cycles!");
       }
-      else if ( !TreeOperation.isBinaryTree(g, root) )
+      else if ( method != 4 && !TreeOperation.isBinaryTree(g, root) )
       {
         logEntry.setData("Graph was not a Binary Tree");
         g.stopLogEntry(logEntry);
@@ -144,39 +51,46 @@ public class KruinTreeDrawOperation
         KruinNodeEx rootEx = (KruinNodeEx)root.getExtender();
 
         buildTree(rootEx);
-        buildSelectedStructure(g, rootEx);
+
+        if ( method == 1 )
+        {
+          domainTreeMethod(rootEx);
+        }
+        else if ( method == 5 )
+        {
+          drawnTreeMethod(g, rootEx);
+        }
+        else
+        {
+          return;
+        }
 
         int gridWidth = rootEx.getBoundWidth();
         int gridHeight = rootEx.getBoundHeight();
 
-        int treeLeft = leftProjectionPosition + structureOffsetFromLeft;
-        int treeTop = topProjectionPosition + structureOffsetFromTop;
-        int treeRight = treeLeft + gridWidth;
-        int treeBottom = treeTop + gridHeight;
+        /*
+         * Place the whole open tree four grid lines right and four down.
+         * Use boundX for the left margin so the compact bounding box remains intact.
+         */
+        correctGridCoordinates(rootEx, DRAWING_OFFSET_X + rootEx.getBoundX(), DRAWING_OFFSET_Y);
 
-        int effectiveRightProjectionPosition = computeEffectiveRightProjectionPosition(treeRight);
-        int effectiveBottomProjectionPosition = computeEffectiveBottomProjectionPosition(treeBottom);
+        int widthIncrement = 20;
+        int heightIncrement = 20;
 
-        correctGridCoordinates(rootEx, treeLeft + rootEx.getBoundX(), treeTop);
-
-
-        int totalColumns = computeGridColumns(treeRight, effectiveRightProjectionPosition);
-        int totalRows = computeGridRows(treeBottom, effectiveBottomProjectionPosition);
-
-        g.setGridArea(totalRows, gridRowHeight,
-                      totalColumns, gridColumnWidth, true);
+        g.setGridArea(gridHeight + DRAWING_OFFSET_Y + 5, heightIncrement,
+                      gridWidth + DRAWING_OFFSET_X + 5, widthIncrement, true);
 
         KruinNodeEx aNode;
         KruinEdgeEx anEdge;
         for ( int i=0; i<nodes.size(); i++ )
         {
           aNode = (KruinNodeEx)nodes.elementAt(i);
-          g.relocateNode( aNode.getRef(),
-                          new Location( aNode.getGridX()*gridColumnWidth,
-                                        aNode.getGridY()*gridRowHeight ),
-                          true );
+          g.relocateNode(aNode.getRef(),
+                         new Location(aNode.getGridX()*widthIncrement,
+                                      aNode.getGridY()*heightIncrement),
+                         true);
 
-          g.changeNodeLabel(aNode.getRef(), "#"+i+"#"+ aNode.getLabel(), true);
+          g.changeNodeLabel(aNode.getRef(), "#"+i+"#"+aNode.getLabel(), true);
           g.changeNodeColor(aNode.getRef(), Color.yellow, true);
         }
 
@@ -186,128 +100,12 @@ public class KruinTreeDrawOperation
           g.straightenEdge(anEdge.getRef(), true);
         }
 
-        if ( showProjections )
-        {
-          drawProjectionNodes(g, nodes, effectiveRightProjectionPosition, effectiveBottomProjectionPosition);
-        }
-
         g.stopLogEntry(logEntry);
       }
     }
     finally
     {
       root.setSpecialSelected(oldSpecialSelected);
-    }
-  }
-
-  private static void buildSelectedStructure(Graph g, KruinNodeEx root)
-  {
-    if ( structureType == STRUCTURE_TYPE_SIMPLE_TREE )
-    {
-      domainTreeMethod(root);
-    }
-    else if ( structureType == STRUCTURE_TYPE_LANGUAGE_TREE )
-    {
-      domainTreeMethod(root);
-    }
-    else if ( structureType == STRUCTURE_TYPE_ANAPHOR_TREE )
-    {
-      domainTreeMethod(root);
-    }
-    else
-    {
-      domainTreeMethod(root);
-    }
-  }
-
-  private static int computeGridColumns(int treeRight, int effectiveRightProjectionPosition)
-  {
-    int maxColumn = treeRight + 5;
-    if ( showProjections )
-    {
-      if ( leftProjectionEnabled )
-      {
-        maxColumn = Math.max(maxColumn, leftProjectionPosition + 2);
-      }
-      if ( rightProjectionEnabled )
-      {
-        maxColumn = Math.max(maxColumn, effectiveRightProjectionPosition + 2);
-      }
-    }
-    return maxColumn;
-  }
-
-  private static int computeGridRows(int treeBottom, int effectiveBottomProjectionPosition)
-  {
-    int maxRow = treeBottom + 5;
-    if ( showProjections )
-    {
-      if ( topProjectionEnabled )
-      {
-        maxRow = Math.max(maxRow, topProjectionPosition + 2);
-      }
-      if ( bottomProjectionEnabled )
-      {
-        maxRow = Math.max(maxRow, effectiveBottomProjectionPosition + 2);
-      }
-    }
-    return maxRow;
-  }
-
-  private static int computeEffectiveRightProjectionPosition(int treeRight)
-  {
-    return Math.max(rightProjectionPosition, treeRight + structureOffsetFromRight);
-  }
-
-  private static int computeEffectiveBottomProjectionPosition(int treeBottom)
-  {
-    return Math.max(bottomProjectionPosition, treeBottom + structureOffsetFromBottom);
-  }
-
-  private static void drawProjectionNodes(Graph g, Vector nodes, int effectiveRightProjectionPosition, int effectiveBottomProjectionPosition)
-  {
-    KruinNodeEx aNode;
-    Node projectionNode;
-
-    for ( int i=0; i<nodes.size(); i++ )
-    {
-      aNode = (KruinNodeEx)nodes.elementAt(i);
-
-      if ( leftProjectionEnabled )
-      {
-        projectionNode = g.createNode(new Location(leftProjectionPosition*gridColumnWidth,
-                                                   aNode.getGridY()*gridRowHeight));
-        if ( aNode.getSubTreeSize() == 1 )
-        {
-          g.changeNodeLabel(projectionNode, aNode.getIndex()+": "+ aNode.getLabel(), true);
-        }
-        g.changeNodeColor(projectionNode, Color.green, true);
-      }
-
-      if ( rightProjectionEnabled )
-      {
-        projectionNode = g.createNode(new Location(effectiveRightProjectionPosition*gridColumnWidth,
-                                                   aNode.getGridY()*gridRowHeight));
-        if ( aNode.getSubTreeSize() == 1 )
-        {
-          g.changeNodeLabel(projectionNode, aNode.getIndex()+": "+ aNode.getLabel(), true);
-        }
-        g.changeNodeColor(projectionNode, Color.green, true);
-      }
-
-      if ( topProjectionEnabled )
-      {
-        projectionNode = g.createNode(new Location(aNode.getGridX()*gridColumnWidth,
-                                                   topProjectionPosition*gridRowHeight));
-        g.changeNodeColor(projectionNode, Color.orange, true);
-      }
-
-      if ( bottomProjectionEnabled )
-      {
-        projectionNode = g.createNode(new Location(aNode.getGridX()*gridColumnWidth,
-                                                   effectiveBottomProjectionPosition*gridRowHeight));
-        g.changeNodeColor(projectionNode, Color.orange, true);
-      }
     }
   }
 
@@ -331,12 +129,12 @@ public class KruinTreeDrawOperation
 
   private static void drawnTreeMethod(Graph g, KruinNodeEx root)
   {
-    for ( int i=1; i< g.getNumNodes(); i++ )
+    for ( int i=1; i<g.getNumNodes(); i++ )
     {
-      if ( g.getNodeAt(i).getNumEdges() == 1)
+      if ( g.getNodeAt(i).getNumEdges() == 1 )
       {
         Graph gc = KruinShortestPathOperation.getShortestPath(g, g.getNodeAt(0), g.getNodeAt(i), true);
-        shortestPathMethod(gc,g,root);
+        shortestPathMethod(gc, g, root);
       }
     }
   }
@@ -349,7 +147,7 @@ public class KruinTreeDrawOperation
     }
     else
     {
-      if  (root.getSubTreeDone())
+      if ( root.getSubTreeDone() )
       {
         shortestPathMethod(pathGraph, g, root.getLeftChild());
         domainRule(root, root.getLeftChild(), root.getRightChild());
@@ -380,13 +178,13 @@ public class KruinTreeDrawOperation
 
       if ( leftChild != null && rightChild != null )
       {
-        if (!(root.getNode().isSelected()))
+        if ( !(root.getNode().isSelected()) )
         {
           domainRule(root, leftChild, rightChild);
         }
         else
         {
-          root.setLabel("Focus -"+root.getLabel());
+          root.setLabel("Focus -" + root.getLabel());
           domainRule(root, rightChild, leftChild);
         }
       }
@@ -411,7 +209,15 @@ public class KruinTreeDrawOperation
     root.setBoundHeight(0);
   }
 
-  static void domainRule( KruinNodeEx root, KruinNodeEx left, KruinNodeEx right )
+  /**
+   * Compact bottom-up box integration for the open tree.
+   *
+   * Each child first owns its smallest reserved bounding box.
+   * The left subtree is placed completely left of the root axis;
+   * the right subtree is placed completely right of the root axis and below
+   * the reserved left box, so sibling leaves do not collapse onto one line.
+   */
+  static void domainRule(KruinNodeEx root, KruinNodeEx left, KruinNodeEx right)
   {
     int leftShiftX = -(rightExtent(left) + ROOT_SIDE_GAP);
     int leftShiftY = 1;
@@ -437,35 +243,9 @@ public class KruinTreeDrawOperation
     root.setBoundHeight(maxY);
   }
 
-  private static KruinNodeEx findLastNodeWithSizeGreaterThan(KruinNodeEx root, double num)
+  private static void otherRule(KruinNodeEx root, KruinNodeEx child)
   {
-    if ( root.getSubTreeSize() < num )
-    {
-      if ( root.getParent() != null )
-      {
-        return root.getParent();
-      }
-      else
-      {
-        return root;
-      }
-    }
-    else
-    {
-      if ( root.getRightChild() == null)
-      {
-        return findLastNodeWithSizeGreaterThan(root.getLeftChild(), num);
-      }
-      else
-      {
-        return findLastNodeWithSizeGreaterThan(root.getRightChild(), num);
-      }
-    }
-  }
-
-  private static void otherRule( KruinNodeEx root, KruinNodeEx child )
-  {
-    child.shiftY(child.getBoundHeight() + 1);
+    child.shiftY(1);
 
     int minX = Math.min(0, boxMinX(child));
     int maxX = Math.max(0, boxMaxX(child));
@@ -496,7 +276,7 @@ public class KruinTreeDrawOperation
 
   private static int boxMaxX(KruinNodeEx node)
   {
-    return node.getGridX() + rightExtent(node);
+    return node.getGridX() + node.getBoundWidth() - node.getBoundX();
   }
 
   private static int boxMaxY(KruinNodeEx node)
@@ -516,149 +296,5 @@ public class KruinTreeDrawOperation
     {
       correctGridCoordinates(root.getRightChild(), root.getGridX(), root.getGridY());
     }
-  }
-
-  private static void debugOpenLanguageProjection(KruinNodeEx selectedRoot)
-  {
-    try
-    {
-      OpenLanguageGrid grid = new OpenLanguageGrid();
-      Map nodeMap = new HashMap();
-
-      OpenLanguageNode openRoot = buildOpenLanguageSubtree(selectedRoot, null, grid, nodeMap);
-
-      System.out.println("======================================");
-      System.out.println("OPEN LANGUAGE TREE DEBUG");
-      System.out.println("Selected root label   : " + openRoot.getLabel());
-      System.out.println("Logical projection    : " + safe(openRoot.getCategoryValue()));
-      System.out.println("Syntactical projection: " + safe(openRoot.getSyntacticReflection()));
-
-      List lexicalLeaves = new ArrayList();
-      collectPlacedLexicalLeaves(openRoot, nodeMap, lexicalLeaves);
-
-      System.out.print("Lexical projection    : ");
-      if ( lexicalLeaves.size() == 0 )
-      {
-        System.out.println("(none)");
-      }
-      else
-      {
-        for ( int i=0; i<lexicalLeaves.size(); i++ )
-        {
-          if ( i > 0 )
-          {
-            System.out.print(" ");
-          }
-          System.out.print((String)lexicalLeaves.get(i));
-        }
-        System.out.println();
-      }
-      System.out.println("======================================");
-    }
-    catch ( Exception e )
-    {
-      e.printStackTrace();
-    }
-  }
-
-  private static OpenLanguageNode buildOpenLanguageSubtree(KruinNodeEx source,
-                                                           OpenLanguageNode parent,
-                                                           OpenLanguageGrid grid,
-                                                           Map nodeMap)
-  {
-    int id = source.getIndex();
-    OpenLanguageNode node = new OpenLanguageNode(id, source.getLabel());
-    node.setCreatedAtStep(0);
-    node.setCategoryValue(source.getLabel());
-
-    if ( parent != null )
-    {
-      node.setParent(parent.getId());
-    }
-
-    if ( grid.isFree(source.getGridX(), source.getGridY()) )
-    {
-      node.place(source.getGridX(), source.getGridY());
-      grid.occupy(source.getGridX(), source.getGridY(), node.getId());
-    }
-    else
-    {
-      node.deferPlacement();
-    }
-
-    nodeMap.put(Integer.valueOf(node.getId()), node);
-
-    KruinNodeEx left = source.getLeftChild();
-    KruinNodeEx right = source.getRightChild();
-
-    if ( left == null && right == null )
-    {
-      node.setLexicalValue(source.getLabel());
-      return node;
-    }
-
-    OpenLanguageNode leftNode = null;
-    OpenLanguageNode rightNode = null;
-
-    if ( left != null )
-    {
-      leftNode = buildOpenLanguageSubtree(left, node, grid, nodeMap);
-    }
-
-    if ( right != null )
-    {
-      rightNode = buildOpenLanguageSubtree(right, node, grid, nodeMap);
-    }
-
-    if ( leftNode != null && rightNode != null )
-    {
-      node.setChildren(leftNode.getId(), rightNode.getId());
-      node.setExpandedAtStep(0);
-      node.setSyntacticReflection(leftNode.getLabel() + "-" + rightNode.getLabel());
-    }
-
-    return node;
-  }
-
-  private static void collectPlacedLexicalLeaves(OpenLanguageNode node, Map nodeMap, List out)
-  {
-    Integer leftId = node.getLeftChildId();
-    Integer rightId = node.getRightChildId();
-
-    if ( leftId == null && rightId == null )
-    {
-      if ( node.isPlaced() && node.getLexicalValue() != null )
-      {
-        out.add(node.getLexicalValue());
-      }
-      return;
-    }
-
-    if ( leftId != null )
-    {
-      OpenLanguageNode leftNode = (OpenLanguageNode)nodeMap.get(leftId);
-      if ( leftNode != null )
-      {
-        collectPlacedLexicalLeaves(leftNode, nodeMap, out);
-      }
-    }
-
-    if ( rightId != null )
-    {
-      OpenLanguageNode rightNode = (OpenLanguageNode)nodeMap.get(rightId);
-      if ( rightNode != null )
-      {
-        collectPlacedLexicalLeaves(rightNode, nodeMap, out);
-      }
-    }
-  }
-
-  private static String safe(String s)
-  {
-    if ( s == null )
-    {
-      return "(none)";
-    }
-    return s;
   }
 }
