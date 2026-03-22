@@ -16,3 +16,5 @@ sources.txt
 # OS files
 Thumbs.db
 .DS_Store
+
+config/kruin_user.properties

@@ -159,6 +159,7 @@ public class KruinTreeDrawOperation
 
         correctGridCoordinates(rootEx, treeLeft + rootEx.getBoundX(), treeTop);
 
+        debugOpenLanguageProjection(rootEx);
 
         int totalColumns = computeGridColumns(treeRight, effectiveRightProjectionPosition);
         int totalRows = computeGridRows(treeBottom, effectiveBottomProjectionPosition);

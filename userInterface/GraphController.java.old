@@ -1229,7 +1229,7 @@ public class GraphController implements InternalFrameListener
           displayChanTreeHelper(getOwner(), this);
         }
       };
-      ged.enableRunButton();
+      ged.disableRunButton();
       activeGraphEditorWindow.getGraphEditor().allowNodeSelection(1);
       activeGraphEditorWindow.setDialog(ged);
       graphWindow.showDialog(ged);
@@ -1285,7 +1285,7 @@ public class GraphController implements InternalFrameListener
           displayKruinTreeHelper(getOwner(), this);
         }
       };
-      ged.enableRunButton();
+      ged.disableRunButton();
       activeGraphEditorWindow.getGraphEditor().allowNodeSelection(1);
       activeGraphEditorWindow.setDialog(ged);
       graphWindow.showDialog(ged);
@@ -1294,35 +1294,27 @@ public class GraphController implements InternalFrameListener
 
   private void displayKruinTreeHelper(GraphEditorWindow editorWindow, KruinDialog dialog)
   {
+    Node[] selectedRoots = editorWindow.getGraphEditor().getSpecialNodeSelections();
+
+    if ( selectedRoots == null || selectedRoots.length == 0 || selectedRoots[0] == null )
+    {
+      JOptionPane.showMessageDialog(graphWindow,
+                                    "Select exactly one root node before pressing Run.",
+                                    "No Root Node Selected",
+                                    JOptionPane.WARNING_MESSAGE);
+      return;
+    }
+
     try
     {
-      Node rootNode = null;
-      Node[] selectedRoots = editorWindow.getGraphEditor().getSpecialNodeSelections();
-      if ( selectedRoots != null && selectedRoots.length > 0 )
-      {
-        rootNode = selectedRoots[0];
-      }
-      else if ( editorWindow.getGraphEditor().getGraph().getNumNodes() > 0 )
-      {
-        rootNode = editorWindow.getGraphEditor().getGraph().getNodeAt(0);
-      }
-
-      if ( rootNode == null )
-      {
-        JOptionPane.showMessageDialog(graphWindow,
-                                      "The graph contains no nodes.",
-                                      "Kruin Tree Drawing",
-                                      JOptionPane.WARNING_MESSAGE);
-        return;
-      }
-
       editorWindow.getGraphEditor().getGraph().newMemento("Display KruinDomain Tree Drawing");
       KruinTreeDrawOperation.displayKruinTreeDrawing(
         editorWindow.getGraphEditor().getGraph(),
-        rootNode,
+        selectedRoots[0],
         dialog.getSelectedMethodNumber(),
         editorWindow.getGraphEditor().getDrawWidth(),
         editorWindow.getGraphEditor().getDrawHeight() );
+   //   editorWindow.getGraphEditor().setPreferredSize();
       editorWindow.getGraphEditor().update();
       editorWindow.getGraphEditor().allowNodeSelection(0);
       graphWindow.close(editorWindow.getDialog());
