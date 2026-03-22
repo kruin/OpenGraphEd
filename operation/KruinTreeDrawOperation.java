@@ -19,6 +19,20 @@ public class KruinTreeDrawOperation
    */
   private static final int ROOT_SIDE_GAP = 1;
 
+  /**
+   * Global placement of the complete drawing, including projection nodes.
+   */
+  private static final int DRAWING_OFFSET_X = 4;
+  private static final int DRAWING_OFFSET_Y = 2;
+
+  /**
+   * Projection guides must stay outside the tree box.
+   * With the tree starting at x=4 and y=2, place the left projection at x=2
+   * and the top projection at y=0.
+   */
+  private static final int LEFT_PROJECTION_X = 2;
+  private static final int TOP_PROJECTION_Y = 0;
+
   public static void displayKruinTreeDrawing(Graph g, Node root, int method,
                                             int width, int height) throws Exception
   {
@@ -86,7 +100,7 @@ public class KruinTreeDrawOperation
         int gridWidth = rootEx.getBoundWidth();
         int gridHeight = rootEx.getBoundHeight();
 
-        correctGridCoordinates(rootEx, 2 + rootEx.getBoundX(), 2);
+        correctGridCoordinates(rootEx, DRAWING_OFFSET_X + rootEx.getBoundX(), DRAWING_OFFSET_Y);
 
         // --- OPEN LANGUAGE TREE DEBUG / TEST ---
         debugOpenLanguageProjection(rootEx);
@@ -94,8 +108,8 @@ public class KruinTreeDrawOperation
 
         int widthIncrement = 20;//doubled in graphcontroller-kruinGridMode()
         int heightIncrement = 20;//ditto, or KruinDialog-WIDTH 400
-        g.setGridArea(gridHeight + 5, heightIncrement,
-                      gridWidth + 5, widthIncrement, true);
+        g.setGridArea(gridHeight + DRAWING_OFFSET_Y + 5, heightIncrement,
+                      gridWidth + DRAWING_OFFSET_X + 5, widthIncrement, true);
 
         KruinNodeEx aNode;
         KruinEdgeEx anEdge;
@@ -123,14 +137,16 @@ public class KruinTreeDrawOperation
         {
           aNode = (KruinNodeEx)nodes.elementAt(i);
 
-          matrixNode = g.createNode(new Location(10, aNode.getGridY()*heightIncrement));
+          matrixNode = g.createNode(new Location(LEFT_PROJECTION_X*widthIncrement,
+                                                  aNode.getGridY()*heightIncrement));
           if ( aNode.getSubTreeSize() == 1 )
           {
             g.changeNodeLabel(matrixNode, aNode.getIndex()+": "+ aNode.getLabel(), true);
             g.changeNodeColor(matrixNode, Color.green, true);
           }
 
-          matrixNode = g.createNode(new Location(aNode.getGridX()*widthIncrement,10));
+          matrixNode = g.createNode(new Location(aNode.getGridX()*widthIncrement,
+                                                  TOP_PROJECTION_Y*heightIncrement));
           g.changeNodeColor(matrixNode, Color.orange, true);
         }
         g.stopLogEntry(logEntry);
