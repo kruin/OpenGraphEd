@@ -21,6 +21,9 @@ public class GraphController implements InternalFrameListener
   private GraphEditorWindow activeGraphEditorWindow;
   private GraphEditorDialog activeGraphEditorDialog;
   private MenuAndToolBar menuAndToolBar;
+  private boolean otsResultAvailable = false;
+  private GraphEditorWindow otsResultWindow = null;
+  private Graph otsResultGraph = null;
   private boolean isApplication;
   private JInternalFrame lastWindow;
   private int lastShownIndex;
@@ -71,6 +74,28 @@ public class GraphController implements InternalFrameListener
   public JMenuBar getMenuBar()
   {
     return menuAndToolBar.getMenuBar();
+  }
+
+  private void refreshOTSMenuVisibility()
+  {
+    if ( menuAndToolBar == null )
+    {
+      return;
+    }
+
+    if ( otsResultAvailable &&
+         activeGraphEditorWindow != null &&
+         activeGraphEditorWindow == otsResultWindow &&
+         otsResultGraph != null )
+    {
+      menuAndToolBar.showSaveOTS();
+      menuAndToolBar.setSaveOTSEnabled(true);
+    }
+    else
+    {
+      menuAndToolBar.setSaveOTSEnabled(false);
+      menuAndToolBar.hideSaveOTS();
+    }
   }
 
   public void internalFrameOpened(InternalFrameEvent e)
@@ -128,6 +153,7 @@ public class GraphController implements InternalFrameListener
       else
       {
         menuAndToolBar.showControls( activeGraphEditorWindow.getGraphEditor() );
+        refreshOTSMenuVisibility();
         lastWindow = activeGraphEditorWindow;
       }
     }
@@ -145,12 +171,14 @@ public class GraphController implements InternalFrameListener
         lastWindow = activeGraphEditorDialog;
       }
       menuAndToolBar.hideControls();
+      refreshOTSMenuVisibility();
     }
   }
 
   public void internalFrameDeactivated(InternalFrameEvent e)
   {
     menuAndToolBar.hideControls();
+    refreshOTSMenuVisibility();
     if ( e.getSource() instanceof GraphEditorWindow &&
          activeGraphEditorWindow == (GraphEditorWindow)e.getSource() )
     {
@@ -248,11 +276,13 @@ public class GraphController implements InternalFrameListener
 
   public void newGraph()
   {
+    resetOTSCommandState();
     graphWindow.addGraphEditorWindow(this);
   }
 
   public void loadGraph()
   {
+    resetOTSCommandState();
     JFileChooser fc = new JFileChooser();
     fc.addChoosableFileFilter(new GraphFilter());
     fc.setFileView(new GraphFileView());
@@ -382,6 +412,7 @@ public class GraphController implements InternalFrameListener
 
   public void closeGraph()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.doDefaultCloseAction();
@@ -410,6 +441,7 @@ public class GraphController implements InternalFrameListener
 
   public void editMode()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().changeToEditMode();
@@ -419,6 +451,7 @@ public class GraphController implements InternalFrameListener
 
   public void gridMode()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().changeToGridMode();
@@ -427,6 +460,7 @@ public class GraphController implements InternalFrameListener
   }
   public void kruinGridMode()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
    activeGraphEditorWindow.getGraphEditor().changeToKruinGridMode(40/*rows*/,20/*height*/,30,20);
@@ -438,6 +472,7 @@ public class GraphController implements InternalFrameListener
   }
   public void moveMode()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().changeToMoveMode();
@@ -448,6 +483,7 @@ public class GraphController implements InternalFrameListener
 
   public void rotateMode()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().changeToRotateMode();
@@ -457,6 +493,7 @@ public class GraphController implements InternalFrameListener
 
   public void resizeMode()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().changeToResizeMode();
@@ -520,6 +557,7 @@ public class GraphController implements InternalFrameListener
 
   public void removeSelected()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().getGraph().newMemento("Remove Selected");
@@ -532,6 +570,7 @@ public class GraphController implements InternalFrameListener
 
   public void removeAll()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().getGraph().newMemento("Remove All");
@@ -544,6 +583,7 @@ public class GraphController implements InternalFrameListener
 
   public void removeGenerated()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().getGraph().newMemento("Remove Generated Edges");
@@ -556,6 +596,7 @@ public class GraphController implements InternalFrameListener
 
   public void preserveGenerated()
   {
+    resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
       activeGraphEditorWindow.getGraphEditor().getGraph().newMemento("Make Generated Edges Permanent");
@@ -1272,10 +1313,64 @@ public class GraphController implements InternalFrameListener
     }
   }
 
+
+  private void invalidateOTSResult()
+  {
+    otsResultAvailable = false;
+    otsResultWindow = null;
+    otsResultGraph = null;
+    refreshOTSMenuVisibility();
+  }
+
+  private void resetOTSCommandState()
+  {
+    otsResultAvailable = false;
+    otsResultWindow = null;
+    otsResultGraph = null;
+    refreshOTSMenuVisibility();
+  }
+
+  private void makeOTSResultAvailable(GraphEditorWindow window, Graph drawnGraph) throws Exception
+  {
+    otsResultAvailable = true;
+    otsResultWindow = window;
+    otsResultGraph = cloneGraph(drawnGraph);
+    refreshOTSMenuVisibility();
+  }
+
+  public void saveOTS()
+  {
+    if ( activeGraphEditorWindow == null ||
+         !otsResultAvailable ||
+         activeGraphEditorWindow != otsResultWindow ||
+         otsResultGraph == null )
+    {
+      JOptionPane.showMessageDialog(graphWindow,
+                                    "Save OTS is only available immediately after a Kruin draw.",
+                                    "Save OTS",
+                                    JOptionPane.INFORMATION_MESSAGE);
+      invalidateOTSResult();
+      return;
+    }
+    try
+    {
+      Graph currentGraph = activeGraphEditorWindow.getGraphEditor().getGraph();
+      saveOTSGraph(currentGraph, otsResultGraph);
+      invalidateOTSResult();
+    }
+    catch ( Exception e )
+    {
+      e.printStackTrace();
+      JOptionPane.showMessageDialog(graphWindow, e.getMessage(),
+                                    "Error During Save OTS", JOptionPane.ERROR_MESSAGE);
+    }
+  }
+
   public void displayKruinTree()
   {
     if ( activeGraphEditorWindow != null )
     {
+      invalidateOTSResult();
       if ( activeGraphEditorWindow.getDialog() != null )
       {
         graphWindow.close(activeGraphEditorWindow.getDialog());
@@ -1283,18 +1378,11 @@ public class GraphController implements InternalFrameListener
       KruinDialog ged = new KruinDialog( this,
       activeGraphEditorWindow,
       "Kruin Tree Drawing Display",
-      "<html>Select structure type, then Run or Save OTS.</html>" )
+      "<html>Select structure type, then Run.</html>" )
       {
         public void actionPerformed(ActionEvent e)
         {
-          if ( "Save OTS".equals(e.getActionCommand()) )
-          {
-            saveKruinSimpleOTSHelper(getOwner(), this);
-          }
-          else
-          {
-            displayKruinTreeHelper(getOwner(), this);
-          }
+          displayKruinTreeHelper(getOwner(), this);
         }
       };
       activeGraphEditorWindow.getGraphEditor().allowNodeSelection(0);
@@ -1309,7 +1397,7 @@ public class GraphController implements InternalFrameListener
     {
       Graph graph = editorWindow.getGraphEditor().getGraph();
       int rootIndex = getKruinRootIndex(editorWindow);
-      graph.newMemento("Display Open Tree Simple Drawing");
+      graph.newMemento("Display Kruin Drawing");
       KruinTreeDrawOperation.displayKruinTreeDrawing(
         graph,
         graph.getNodeAt(rootIndex),
@@ -1322,6 +1410,7 @@ public class GraphController implements InternalFrameListener
       editorWindow.setDialog(null);
       graph.doneMemento();
       newUndo();
+      makeOTSResultAvailable(editorWindow, graph);
     }
     catch ( Exception e )
     {
@@ -1331,41 +1420,7 @@ public class GraphController implements InternalFrameListener
       }
       editorWindow.getGraphEditor().getGraph().abortMemento();
       JOptionPane.showMessageDialog(graphWindow, e.getMessage(),
-                                    "Error During Open Tree Simple Display", JOptionPane.ERROR_MESSAGE);
-    }
-  }
-
-  private void saveKruinSimpleOTSHelper(GraphEditorWindow editorWindow, KruinDialog dialog)
-  {
-    if ( dialog.getStructureType() != KruinDialog.STRUCTURE_SIMPLE_TREE )
-    {
-      JOptionPane.showMessageDialog(graphWindow,
-                                    "Save OTS is currently available only for Structure Type Simple.",
-                                    "Save OTS",
-                                    JOptionPane.INFORMATION_MESSAGE);
-      return;
-    }
-    try
-    {
-      Graph sourceGraph = editorWindow.getGraphEditor().getGraph();
-      int rootIndex = getKruinRootIndex(editorWindow);
-      Graph otsGraph = cloneGraph(sourceGraph);
-      KruinTreeDrawOperation.displayKruinTreeDrawing(
-        otsGraph,
-        otsGraph.getNodeAt(rootIndex),
-        dialog.getSelectedMethodNumber(),
-        editorWindow.getGraphEditor().getDrawWidth(),
-        editorWindow.getGraphEditor().getDrawHeight() );
-      saveOTSGraph(sourceGraph, otsGraph);
-    }
-    catch ( Exception e )
-    {
-      if ( !(e instanceof GraphException) )
-      {
-        e.printStackTrace();
-      }
-      JOptionPane.showMessageDialog(graphWindow, e.getMessage(),
-                                    "Error During Save OTS", JOptionPane.ERROR_MESSAGE);
+                                    "Error During Kruin Drawing Display", JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -1409,84 +1464,81 @@ public class GraphController implements InternalFrameListener
     return cloned;
   }
 
-  private void saveOTSGraph(Graph sourceGraph, Graph otsGraph) throws Exception
+
+private void saveOTSGraph(Graph sourceGraph, Graph otsGraph) throws Exception
+{
+  String sourcePath = tryGetGraphFilePath(sourceGraph);
+  String suggestedPath = null;
+  String savePath = null;
+
+  if ( sourcePath != null && sourcePath.length() > 0 )
   {
-    String sourcePath = tryGetGraphFilePath(sourceGraph);
-    String suggestedPath = null;
-    String savePath = null;
-
-    if ( sourcePath != null && sourcePath.length() > 0 )
-    {
-      suggestedPath = deriveOTSPath(sourcePath);
-    }
-    else
-    {
-      suggestedPath = new File(System.getProperty("user.dir"), "OTS_graph.graph").getCanonicalPath();
-    }
-
-    JFileChooser fc = new JFileChooser();
-    GraphFilter graphFilter = new GraphFilter();
-    fc.addChoosableFileFilter(graphFilter);
-    fc.setFileFilter(graphFilter);
-    fc.setFileView(new GraphFileView());
-
-    File suggestedFile = new File(suggestedPath);
-    File parentDir = suggestedFile.getParentFile();
-    if ( parentDir != null && parentDir.exists() )
-    {
-      fc.setCurrentDirectory(parentDir);
-    }
-    else
-    {
-      fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
-    }
-    fc.setSelectedFile(new File(suggestedFile.getName()));
-    fc.setDialogTitle("Save OTS Graph");
-    fc.setApproveButtonText("Save OTS");
-    fc.setApproveButtonToolTipText("OTS = Open Tree Simple Version");
-
-    JPanel accessory = new JPanel(new BorderLayout());
-    accessory.add(new JLabel("<html><b>OTS</b> = Open Tree Simple Version<br>Suggested result name starts with <b>OTS_</b>.</html>"),
-                  BorderLayout.NORTH);
-    fc.setAccessory(accessory);
-
-    int returnVal = fc.showSaveDialog(graphWindow);
-    if ( returnVal != JFileChooser.APPROVE_OPTION )
-    {
-      return;
-    }
-
-    savePath = fc.getSelectedFile().getCanonicalPath();
-    String fileExt = Utils.getExtension(fc.getSelectedFile());
-    if ( fileExt == null )
-    {
-      savePath = savePath + ".graph";
-      fileExt = Utils.graph;
-    }
-    if ( fileExt == null || !fileExt.equalsIgnoreCase(Utils.graph) )
-    {
-      JOptionPane.showMessageDialog(graphWindow,
-                                    "OTS graphs may only be saved as .graph files.",
-                                    "Unable to Save OTS Graph",
-                                    JOptionPane.ERROR_MESSAGE);
-      return;
-    }
-    if ( !confirmOverwriteIfNeeded(savePath) )
-    {
-      return;
-    }
-
-    PrintWriter writer = new PrintWriter(new FileWriter(savePath));
-    otsGraph.saveTo(writer);
-    writer.close();
-
-    JOptionPane.showMessageDialog(graphWindow,
-                                  "Open Tree Simple Version saved to:\n" + savePath,
-                                  "Save OTS",
-                                  JOptionPane.INFORMATION_MESSAGE);
+    suggestedPath = deriveOTSPath(sourcePath);
+  }
+  else
+  {
+    suggestedPath = new File(System.getProperty("user.dir"), "OTS_graph.ots").getCanonicalPath();
   }
 
-  private boolean confirmOverwriteIfNeeded(String savePath)
+  JFileChooser fc = new JFileChooser();
+
+  File suggestedFile = new File(suggestedPath);
+  File parentDir = suggestedFile.getParentFile();
+  if ( parentDir != null && parentDir.exists() )
+  {
+    fc.setCurrentDirectory(parentDir);
+  }
+  else
+  {
+    fc.setCurrentDirectory(new File(System.getProperty("user.dir")));
+  }
+  fc.setSelectedFile(new File(suggestedFile.getName()));
+  fc.setDialogTitle("Save OTS");
+  fc.setApproveButtonText("Save OTS");
+  fc.setApproveButtonToolTipText("OTS = Open Tree Structure");
+
+  JPanel accessory = new JPanel(new BorderLayout());
+  accessory.add(new JLabel("<html><b>OTS</b> = Open Tree Structure<br>Suggested result name starts with <b>OTS_</b> and ends with <b>.ots</b>.</html>"),
+                BorderLayout.NORTH);
+  fc.setAccessory(accessory);
+
+  int returnVal = fc.showSaveDialog(graphWindow);
+  if ( returnVal != JFileChooser.APPROVE_OPTION )
+  {
+    return;
+  }
+
+  savePath = fc.getSelectedFile().getCanonicalPath();
+  String fileExt = Utils.getExtension(fc.getSelectedFile());
+  if ( fileExt == null )
+  {
+    savePath = savePath + ".ots";
+    fileExt = "ots";
+  }
+  if ( fileExt == null || !fileExt.equalsIgnoreCase("ots") )
+  {
+    JOptionPane.showMessageDialog(graphWindow,
+                                  "OTS files may only be saved as .ots files.",
+                                  "Unable to Save OTS",
+                                  JOptionPane.ERROR_MESSAGE);
+    return;
+  }
+  if ( !confirmOverwriteIfNeeded(savePath) )
+  {
+    return;
+  }
+
+  PrintWriter writer = new PrintWriter(new FileWriter(savePath));
+  otsGraph.saveTo(writer);
+  writer.close();
+
+  JOptionPane.showMessageDialog(graphWindow,
+                                "Open Tree Structure saved to:\n" + savePath,
+                                "Save OTS",
+                                JOptionPane.INFORMATION_MESSAGE);
+}
+
+private boolean confirmOverwriteIfNeeded(String savePath)
   {
     File aFile = new File(savePath);
     if ( aFile.exists() )
@@ -1500,23 +1552,32 @@ public class GraphController implements InternalFrameListener
     return true;
   }
 
-  private String deriveOTSPath(String sourcePath)
-  {
-    File sourceFile = new File(sourcePath);
-    String name = sourceFile.getName();
-    File parent = sourceFile.getParentFile();
-    if ( !name.startsWith("OTS_") )
-    {
-      name = "OTS_" + name;
-    }
-    if ( parent != null )
-    {
-      return new File(parent, name).getPath();
-    }
-    return name;
-  }
 
-  private String tryGetGraphFilePath(Graph graph)
+private String deriveOTSPath(String sourcePath)
+{
+  File sourceFile = new File(sourcePath);
+  String name = sourceFile.getName();
+  File parent = sourceFile.getParentFile();
+
+  int dot = name.lastIndexOf('.');
+  if ( dot > 0 )
+  {
+    name = name.substring(0, dot);
+  }
+  if ( !name.startsWith("OTS_") )
+  {
+    name = "OTS_" + name;
+  }
+  name = name + ".ots";
+
+  if ( parent != null )
+  {
+    return new File(parent, name).getPath();
+  }
+  return name;
+}
+
+private String tryGetGraphFilePath(Graph graph)
   {
     try
     {

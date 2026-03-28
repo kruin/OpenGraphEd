@@ -53,7 +53,6 @@ public class KruinDialog extends GraphEditorDialog implements ActionListener
   private JButton runButton;
   private JButton kruinDefaultsButton;
   private JButton userSettingsButton;
-  private JButton saveOTSButton;
 
   private ButtonGroup structureTypeGroup;
   private JRadioButton simpleTreeButton;
@@ -111,12 +110,12 @@ public class KruinDialog extends GraphEditorDialog implements ActionListener
     mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
     getContentPane().add(mainPanel, BorderLayout.CENTER);
 
-    JLabel line1 = new JLabel("Simple: open tree only, without projections.");
+    JLabel line1 = new JLabel("Select structure type, then Run.");
     line1.setAlignmentX(Component.LEFT_ALIGNMENT);
     line1.setHorizontalAlignment(SwingConstants.LEFT);
     mainPanel.add(line1);
 
-    JLabel line2 = new JLabel("Run displays it. Save OTS stores Open Tree Simple Version.");
+    JLabel line2 = new JLabel("Kruin defaults load a type profile. User settings edit details.");
     line2.setAlignmentX(Component.LEFT_ALIGNMENT);
     line2.setHorizontalAlignment(SwingConstants.LEFT);
     mainPanel.add(line2);
@@ -149,12 +148,6 @@ public class KruinDialog extends GraphEditorDialog implements ActionListener
       }
     });
     mainPanel.add(userSettingsButton);
-    mainPanel.add(Box.createRigidArea(new Dimension(0, 6)));
-
-    saveOTSButton = createMainButton("Save OTS");
-    saveOTSButton.setActionCommand("Save OTS");
-    saveOTSButton.addActionListener(this);
-    mainPanel.add(saveOTSButton);
     mainPanel.add(Box.createRigidArea(new Dimension(0, 12)));
 
     JPanel structurePanel = new JPanel();

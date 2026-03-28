@@ -23,6 +23,8 @@ public class MenuAndToolBar
 
   private Vector actions;
   private HashMap groups;
+  private JMenu fileMenu;
+  private MenuAndToolBarAction saveOTSAction;
   
   private JMenuBar menuBar;
   private JToolBar toolBar;
@@ -42,6 +44,8 @@ public class MenuAndToolBar
     groups = new HashMap();
     cursorPoint = null;
     createControls(loadControls());
+    createSaveOTSAction();
+    hideSaveOTS();
     hideControls();
   }
 
@@ -199,6 +203,10 @@ public class MenuAndToolBar
         {
           menu = createMenu(current);
           menuBar.add(menu);
+          if ( menu.getText().equals("File") )
+          {
+            fileMenu = menu;
+          }
           if ( menu.getText().equals("Windows") )
           {
             windowMenu = menu;
@@ -552,6 +560,102 @@ public class MenuAndToolBar
     else
     {
       return null;
+    }
+  }
+
+
+
+  private void createSaveOTSAction()
+  {
+    saveOTSAction = createMenuAndToolbarAction(
+      "S,File,Save OTS,/images/Save.gif,Save the current Open Tree Structure result,O,false,1,saveOTS"
+    );
+    actions.addElement(saveOTSAction);
+    saveOTSAction.setEnabled(false);
+  }
+
+  private boolean fileContainsMenuItem(JMenuItem item)
+  {
+    if ( fileMenu == null || item == null )
+    {
+      return false;
+    }
+    for ( int i=0; i<fileMenu.getItemCount(); i++ )
+    {
+      if ( fileMenu.getItem(i) == item )
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private int getFileMenuIndexAfterSaveGraph()
+  {
+    if ( fileMenu == null )
+    {
+      return -1;
+    }
+    for ( int i=0; i<fileMenu.getItemCount(); i++ )
+    {
+      JMenuItem item = fileMenu.getItem(i);
+      if ( item != null && "Save Graph".equals(item.getText()) )
+      {
+        return i + 1;
+      }
+    }
+    return fileMenu.getItemCount();
+  }
+
+  public void showSaveOTS()
+  {
+    if ( fileMenu == null || saveOTSAction == null )
+    {
+      return;
+    }
+    JMenuItem item = saveOTSAction.getMenuItem();
+    if ( !fileContainsMenuItem(item) )
+    {
+      int index = getFileMenuIndexAfterSaveGraph();
+      if ( index < 0 || index > fileMenu.getItemCount() )
+      {
+        fileMenu.add(item);
+      }
+      else
+      {
+        fileMenu.insert(item, index);
+      }
+    }
+  }
+
+  public void hideSaveOTS()
+  {
+    if ( fileMenu == null || saveOTSAction == null )
+    {
+      return;
+    }
+    JMenuItem item = saveOTSAction.getMenuItem();
+    if ( fileContainsMenuItem(item) )
+    {
+      fileMenu.remove(item);
+      fileMenu.revalidate();
+      fileMenu.repaint();
+    }
+  }
+
+  public void setSaveOTSEnabled(boolean enabled)
+  {
+    if ( saveOTSAction != null )
+    {
+      saveOTSAction.setEnabled(enabled);
+      if ( saveOTSAction.getMenuItem() != null )
+      {
+        saveOTSAction.getMenuItem().setEnabled(enabled);
+      }
+      if ( saveOTSAction.getButton() != null )
+      {
+        saveOTSAction.getButton().setEnabled(enabled);
+      }
     }
   }
 
