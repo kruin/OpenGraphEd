@@ -177,6 +177,11 @@ public class GraphEditor extends JPanel
    */
   public void changeToKruinGridMode(int rows, int rowHeight, int cols, int colWidth)
   {
+    rowHeight = Math.max(2, rowHeight);
+    colWidth = Math.max(2, colWidth);
+    rows = Math.max(2, rows);
+    cols = Math.max(2, cols);
+
     getGraph().setGrid(rows, rowHeight, cols, colWidth, false);
 
     if ( !isInGridMode() )
@@ -189,6 +194,29 @@ public class GraphEditor extends JPanel
       repaint();
     }
     setPreferredSize();
+  }
+
+  /**
+   * Switch to Kruin grid mode with a dynamic grid size.
+   *
+   * The cell size stays fixed (rowHeight/colWidth), but the number of rows and
+   * columns is derived from the current graph bounds so the grid extends behind
+   * the whole image: structure plus projections.
+   */
+  public void changeToDynamicKruinGridMode(int rowHeight, int colWidth)
+  {
+    rowHeight = Math.max(2, rowHeight);
+    colWidth = Math.max(2, colWidth);
+
+    Rectangle2D.Double bounds = getGraph().getBounds(2*DRAW_BUFFER, 2*DRAW_BUFFER);
+
+    int requiredWidth = Math.max(getDrawWidth(), (int)Math.ceil(bounds.getMaxX()) - 2*DRAW_BUFFER);
+    int requiredHeight = Math.max(getDrawHeight(), (int)Math.ceil(bounds.getMaxY()) - 2*DRAW_BUFFER);
+
+    int cols = Math.max(2, (int)Math.ceil((double)requiredWidth / (double)colWidth) + 1);
+    int rows = Math.max(2, (int)Math.ceil((double)requiredHeight / (double)rowHeight) + 1);
+
+    changeToKruinGridMode(rows, rowHeight, cols, colWidth);
   }
   public void changeToGridMode()
   {

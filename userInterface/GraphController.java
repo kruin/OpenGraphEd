@@ -463,11 +463,15 @@ public class GraphController implements InternalFrameListener
     resetOTSCommandState();
     if ( activeGraphEditorWindow != null )
     {
-   activeGraphEditorWindow.getGraphEditor().changeToKruinGridMode(40/*rows*/,20/*height*/,30,20);
+      GraphEditor editor = activeGraphEditorWindow.getGraphEditor();
+      Graph graph = editor.getGraph();
 
+      int rowHeight = graph.getGridRowHeight() > 1 ? graph.getGridRowHeight() : 20;
+      int colWidth = graph.getGridColWidth() > 1 ? graph.getGridColWidth() : 20;
 
-
-      menuAndToolBar.showControls(activeGraphEditorWindow.getGraphEditor());
+      editor.changeToDynamicKruinGridMode(rowHeight, colWidth);
+      menuAndToolBar.showControls(editor);
+      graphWindow.repaint();
     }
   }
   public void moveMode()
