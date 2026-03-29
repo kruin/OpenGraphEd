@@ -170,22 +170,25 @@ public class GraphEditor extends JPanel
 
   public boolean isInGridMode() { return listener.isGridListener(); }
 
-  public void changeToKruinGridMode(int rows, int height, int cols, int width)
+  /**
+   * Switch to grid mode using explicit grid counts and explicit cell sizes.
+   * For Kruin drawings these parameters are row/column counts plus row height
+   * and column width, not a total drawing area.
+   */
+  public void changeToKruinGridMode(int rows, int rowHeight, int cols, int colWidth)
   {
-   // getGraph().setGrid(getGraph().getGridRows(), height, getGraph().getGridCols(), width, false);
-   getGraph().setGrid(rows, height,cols, width, false);
+    getGraph().setGrid(rows, rowHeight, cols, colWidth, false);
 
-      if ( !isInGridMode() )
-      {
-        removeEventHandlers();
-        initShapes();
-        listener = new GridListener(listener);
-        addEventHandlers();
-        updateShapes();
-        repaint();
-      }
-     setPreferredSize();
-
+    if ( !isInGridMode() )
+    {
+      removeEventHandlers();
+      initShapes();
+      listener = new GridListener(listener);
+      addEventHandlers();
+      updateShapes();
+      repaint();
+    }
+    setPreferredSize();
   }
   public void changeToGridMode()
   {

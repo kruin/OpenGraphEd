@@ -197,14 +197,22 @@ public class Graph
 
   private int getRowHeight(int numRows, int height)
   {
-    return height / (numRows-1); 
+    if ( numRows <= 1 )
+    {
+      numRows = 2;
+    }
+    return Math.max(1, height / (numRows-1)); 
   }
-  
+
   private int getColWidth(int numCols, int width)
   {
-    return width / (numCols-1);
+    if ( numCols <= 1 )
+    {
+      numCols = 2;
+    }
+    return Math.max(1, width / (numCols-1));
   }
-  
+
   public void setGrid(int numRows, int rowHeight, int numCols, int colWidth,
                       boolean addMemento)
   {
@@ -212,12 +220,20 @@ public class Graph
     {
       currentMemento.addMemento(GridSizeMemento.createGridSizeMemento(this));
     }
+    if ( numRows <= 1 )
+    {
+      numRows = 2;
+    }
+    if ( numCols <= 1 )
+    {
+      numCols = 2;
+    }
     gridRows = numRows;
-    gridRowHeight = rowHeight;
+    gridRowHeight = Math.max(1, rowHeight);
     gridCols = numCols;
-    gridColWidth = colWidth;
+    gridColWidth = Math.max(1, colWidth);
   }
-  
+
   public void setGridArea(int numRows, int height, int numCols, int width,
                           boolean addMemento)
   {
@@ -238,25 +254,51 @@ public class Graph
     gridCols = numCols;
     gridColWidth = getColWidth(numCols, width);
   }
-  
+
   public int getGridRows() { return gridRows; }
-  
+
   public int getGridCols() { return gridCols; }
-  
+
   public int getGridColWidth() { return gridColWidth; }
-  
+
   public int getGridRowHeight() { return gridRowHeight; }
-  
+
   public void setDrawGrid(boolean draw) { drawGrid = draw; }
 
-  public boolean getDrawGrid() { return drawGrid && gridRows >= 2 && gridCols >= 2; }
-  
-  public int getGridHeight() { return (gridRows-1)*gridRowHeight; }
-  
-  public int getGridWidth() { return (gridCols-1)*gridColWidth; }
-  
+  public boolean getDrawGrid()
+  {
+    return drawGrid &&
+           gridRows >= 2 &&
+           gridCols >= 2 &&
+           gridRowHeight >= 1 &&
+           gridColWidth >= 1;
+  }
+
+  public int getGridHeight()
+  {
+    if ( gridRows < 2 || gridRowHeight < 1 )
+    {
+      return 0;
+    }
+    return (gridRows-1)*gridRowHeight;
+  }
+
+  public int getGridWidth()
+  {
+    if ( gridCols < 2 || gridColWidth < 1 )
+    {
+      return 0;
+    }
+    return (gridCols-1)*gridColWidth;
+  }
+
   public void drawGrid(Graphics2D g2, int xOffset, int yOffset)
   {
+    if ( !getDrawGrid() )
+    {
+      return;
+    }
+
     int x = 0 + xOffset;
     int y = 0 + yOffset;
     g2.setColor(Color.gray); 
@@ -271,28 +313,45 @@ public class Graph
       g2.drawLine(x, yOffset, x, gridRowHeight*(gridRows-1) + yOffset);
     }
   }
-  
+
   public Location getClosestGridLocation(Location location)
   {
-    int row = (int)Math.round(location.doubleY() / gridRowHeight);
-    int col = (int)Math.round(location.doubleX() / gridColWidth);
-    if ( row > gridRows-1 )
+    int safeGridRowHeight = Math.max(1, gridRowHeight);
+    int safeGridColWidth = Math.max(1, gridColWidth);
+    int safeGridRows = Math.max(2, gridRows);
+    int safeGridCols = Math.max(2, gridCols);
+
+    int row = (int)Math.round(location.doubleY() / safeGridRowHeight);
+    int col = (int)Math.round(location.doubleX() / safeGridColWidth);
+    if ( row < 0 )
     {
-      row = gridRows-1;
+      row = 0;
     }
-    if ( col > gridCols-1 )
+    if ( col < 0 )
     {
-      col = gridCols-1;
+      col = 0;
     }
-    return new Location( col*gridColWidth, row*gridRowHeight);
+    if ( row > safeGridRows-1 )
+    {
+      row = safeGridRows-1;
+    }
+    if ( col > safeGridCols-1 )
+    {
+      col = safeGridCols-1;
+    }
+    return new Location( col*safeGridColWidth, row*safeGridRowHeight);
   }
-  
+
   public boolean isOnGrid(Location location)
   {
+    if ( gridColWidth < 1 || gridRowHeight < 1 )
+    {
+      return false;
+    }
     return location.intX() % gridColWidth == 0 &&
            location.intY() % gridRowHeight == 0;
   }
-  
+
   public void newMemento(String title)
   {
     hasChangedSinceLastSave = true;

@@ -77,8 +77,15 @@ public class KruinTreeDrawOperation
         int widthIncrement = 20;
         int heightIncrement = 20;
 
-        g.setGridArea(gridHeight + DRAWING_OFFSET_Y + 5, heightIncrement,
-                      gridWidth + DRAWING_OFFSET_X + 5, widthIncrement, true);
+        /*
+         * setGridArea(...) interprets its height/width arguments as total drawing
+         * area and divides by (rows-1)/(cols-1). Here we already have explicit
+         * cell increments of 20, so we must call setGrid(...). Using
+         * setGridArea(...) collapses the cell size to 0 or 1 for larger trees
+         * and produces the tiny grid in the upper-left corner of the editor.
+         */
+        g.setGrid(gridHeight + DRAWING_OFFSET_Y + 5, heightIncrement,
+                  gridWidth + DRAWING_OFFSET_X + 5, widthIncrement, true);
 
         KruinNodeEx aNode;
         KruinEdgeEx anEdge;
